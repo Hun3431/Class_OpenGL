@@ -1,4 +1,6 @@
 #include <GLUT/GLUT.h>
+#include <cmath>
+#define    PI               M_PI
 #define    WIDTH            1000
 #define    HEIGHT           1000
 #define    STATE_BREAK      0
@@ -42,6 +44,10 @@ int slidingBarWeight = 20;
 int slidingBarPosition = 0;
 int slidingBarSpeed = 10;
 
+/// 공 초기값 및 선언
+float ballRadius = 10.0;
+Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
+
 Point Wall[] = {
     {  150,    0 },
     {  150,  350 },
@@ -57,8 +63,19 @@ Point Wall[] = {
 Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
 Color slidingBarColor = { 0.5, 0.8, 0.7 };
+Color ballColor = { 0.97, 0.95, 0.99 };
 
 Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
+
+void ShowBall() {
+    int num = 36;
+    float delta = 2 * PI / num;
+    glBegin(GL_POLYGON);
+    for(int i = 0; i < num; i ++) {
+        glVertex2f(ballPosition.x + ballRadius * cos(delta * i), ballPosition.y + ballRadius * sin(delta * i));
+    }
+    glEnd();
+}
 
 void ShowSlidingBar() {
     glBegin(GL_POLYGON);
@@ -103,11 +120,14 @@ void RenderScene(void) {
     glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
     glClear(GL_COLOR_BUFFER_BIT);
     
-    glColor3f(wallColor.red, wallColor.green, wallColor.blue);
-    ShowWall();
+    glColor3f(ballColor.red, ballColor.green, ballColor.blue);
+    ShowBall();
     
     glColor3f(slidingBarColor.red, slidingBarColor.green, slidingBarColor.blue);
     ShowSlidingBar();
+    
+    glColor3f(wallColor.red, wallColor.green, wallColor.blue);
+    ShowWall();
     
     glutSwapBuffers();
     glFlush();
