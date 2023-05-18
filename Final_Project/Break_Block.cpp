@@ -7,6 +7,16 @@ typedef struct _Point {
     float    y;
 } Point;
 
+typedef struct _Color {
+    float   red;
+    float   green;
+    float   blue;
+    float   clamp = 0.0;
+} Color;
+
+Color backGroundColor = { 0.1, 0.1, 0.1 };
+Color wallColor = { 0.9, 0.8, 0.5 };
+
 int         left = 0;
 int         bottom = 0;
 
@@ -39,10 +49,10 @@ void MyReshape(int w, int h) {
 }
 
 void RenderScene(void) {
-    glClearColor(0.1, 0.1, 0.1, 0.0);
+    glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
     glClear(GL_COLOR_BUFFER_BIT);
     
-    glColor3f(0.9, 0.8, 0.5);
+    glColor3f(wallColor.red, wallColor.green, wallColor.blue);
     ShowWall();
     
     glutSwapBuffers();
