@@ -55,6 +55,15 @@ Color wallColor = { 0.9, 0.8, 0.5 };
 
 Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
 
+void ShowSlidingBar() {
+    glBegin(GL_POLYGON);
+    glVertex2i(slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y);
+    glVertex2i(slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
+    glVertex2i(slidingBar.center.x + slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
+    glVertex2i(slidingBar.center.x + slidingBar.len / 2, slidingBar.center.y);
+    glEnd();
+}
+
 void ShowWall() {
     glLineWidth(3.0);
     glBegin(GL_LINE_STRIP);
