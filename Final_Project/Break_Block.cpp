@@ -2,6 +2,11 @@
 #define    WIDTH            1000
 #define    HEIGHT           1000
 
+typedef struct _Point {
+    float    x;
+    float    y;
+} Point;
+
 int         left = 0;
 int         bottom = 0;
 
