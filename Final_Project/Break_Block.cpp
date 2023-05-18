@@ -52,7 +52,7 @@ Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
 /// 공 초기값 및 선언
 float ballRadius = 10.0;
 Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
-Point ballSpeed = { 0.1, 0.1 };
+Point ballSpeed = { 1.0, 1.0 };
 
 Point Wall[] = {
     {  150,    0 },
@@ -74,6 +74,17 @@ Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
 Color slidingBarColor = { 0.5, 0.8, 0.7 };
 Color ballColor = { 0.97, 0.95, 0.99 };
+
+
+/*
+ *  CollisionDetection Function
+ */
+void CollisionDetectionToWindow() {
+    ballSpeed.x *= ballPosition.x + ballRadius >= WIDTH ? -1 : 1;
+    ballSpeed.x *= ballPosition.x - ballRadius <= 0 ? -1 : 1;
+    ballSpeed.y *= ballPosition.y + ballRadius >= HEIGHT ? -1 : 1;
+    ballSpeed.y *= ballPosition.y - ballRadius <= 0 ? -1 : 1;
+}
 
 
 /*
@@ -142,6 +153,7 @@ void RenderScene(void) {
     glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
     glClear(GL_COLOR_BUFFER_BIT);
     
+    // 요소 출력
     glColor3f(ballColor.red, ballColor.green, ballColor.blue);
     ShowBall();
     
@@ -150,6 +162,10 @@ void RenderScene(void) {
     
     glColor3f(wallColor.red, wallColor.green, wallColor.blue);
     ShowWall();
+    
+    
+    // 충돌 검증
+    CollisionDetectionToWindow();
     
     ballPosition.x += ballSpeed.x;
     ballPosition.y += ballSpeed.y;
