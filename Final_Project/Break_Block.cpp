@@ -81,10 +81,10 @@ void ShowWall() {
 void MySpecialKey(int key, int x, int y) {
     switch (key) {
         case GLUT_KEY_LEFT:
-            slidingBarPosition -= slidingBarSpeed;
+            slidingBarPosition -= slidingBarPosition + slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
             break;
         case GLUT_KEY_RIGHT:
-            slidingBarPosition += slidingBarSpeed;
+            slidingBarPosition += slidingBarPosition + slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
             break;
         default:
             break;
