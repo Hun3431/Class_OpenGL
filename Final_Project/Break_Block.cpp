@@ -43,10 +43,12 @@ int slidingBarLen = 200;
 int slidingBarWeight = 20;
 int slidingBarPosition = 0;
 int slidingBarSpeed = 10;
+Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
 
 /// 공 초기값 및 선언
 float ballRadius = 10.0;
 Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
+Point ballSpeed = { 0.1, 0.1 };
 
 Point Wall[] = {
     {  150,    0 },
@@ -64,8 +66,6 @@ Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
 Color slidingBarColor = { 0.5, 0.8, 0.7 };
 Color ballColor = { 0.97, 0.95, 0.99 };
-
-Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
 
 void ShowBall() {
     int num = 36;
@@ -129,6 +129,9 @@ void RenderScene(void) {
     glColor3f(wallColor.red, wallColor.green, wallColor.blue);
     ShowWall();
     
+    ballPosition.x += ballSpeed.x;
+    ballPosition.y += ballSpeed.y;
+    
     glutSwapBuffers();
     glFlush();
 }
@@ -142,5 +145,6 @@ int main(int argc, char** argv) {
     glutReshapeFunc(MyReshape);
     glutDisplayFunc(RenderScene);
     glutSpecialFunc(MySpecialKey);
+    glutIdleFunc(RenderScene);
     glutMainLoop();
 }
