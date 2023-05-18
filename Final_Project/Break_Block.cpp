@@ -33,10 +33,14 @@ typedef struct _Bar {
     int weight;
 } Bar;
 
-int         left = 0;
-int         bottom = 0;
-int         slidingBarLen = 200;
-int         slidingBarWeight = 20;
+int left = 0;
+int bottom = 0;
+
+/// 슬라이딩 바 초기값
+int slidingBarLen = 200;
+int slidingBarWeight = 20;
+int slidingBarPosition = 0;
+int slidingBarSpeed = 10;
 
 Point Wall[] = {
     {  150,    0 },
@@ -52,15 +56,16 @@ Point Wall[] = {
 
 Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
+Color slidingBarColor = { 0.5, 0.8, 0.7 };
 
 Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
 
 void ShowSlidingBar() {
     glBegin(GL_POLYGON);
-    glVertex2i(slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y);
-    glVertex2i(slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
-    glVertex2i(slidingBar.center.x + slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
-    glVertex2i(slidingBar.center.x + slidingBar.len / 2, slidingBar.center.y);
+    glVertex2i(slidingBarPosition + slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y);
+    glVertex2i(slidingBarPosition + slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
+    glVertex2i(slidingBarPosition + slidingBar.center.x + slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
+    glVertex2i(slidingBarPosition + slidingBar.center.x + slidingBar.len / 2, slidingBar.center.y);
     glEnd();
 }
 
@@ -71,6 +76,20 @@ void ShowWall() {
         glVertex2f(Wall[i].x, Wall[i].y);
     }
     glEnd();
+}
+
+void MySpecialKey(int key, int x, int y) {
+    switch (key) {
+        case GLUT_KEY_LEFT:
+            slidingBarPosition -= slidingBarSpeed;
+            break;
+        case GLUT_KEY_RIGHT:
+            slidingBarPosition += slidingBarSpeed;
+            break;
+        default:
+            break;
+    }
+    glutPostRedisplay();
 }
 
 void MyReshape(int w, int h) {
@@ -87,6 +106,9 @@ void RenderScene(void) {
     glColor3f(wallColor.red, wallColor.green, wallColor.blue);
     ShowWall();
     
+    glColor3f(slidingBarColor.red, slidingBarColor.green, slidingBarColor.blue);
+    ShowSlidingBar();
+    
     glutSwapBuffers();
     glFlush();
 }
@@ -99,5 +121,6 @@ int main(int argc, char** argv) {
     glutCreateWindow("Break the Block!");
     glutReshapeFunc(MyReshape);
     glutDisplayFunc(RenderScene);
+    glutSpecialFunc(MySpecialKey);
     glutMainLoop();
 }
