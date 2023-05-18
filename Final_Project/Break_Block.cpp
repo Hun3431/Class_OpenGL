@@ -35,6 +35,8 @@ typedef struct _Bar {
 
 int         left = 0;
 int         bottom = 0;
+int         slidingBarLen = 200;
+int         slidingBarWeight = 20;
 
 Point Wall[] = {
     {  150,    0 },
@@ -50,6 +52,8 @@ Point Wall[] = {
 
 Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
+
+Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
 
 void ShowWall() {
     glLineWidth(3.0);
