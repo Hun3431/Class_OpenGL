@@ -1,6 +1,10 @@
 #include <GLUT/GLUT.h>
 #define    WIDTH            1000
 #define    HEIGHT           1000
+#define    STATE_BREAK      0
+#define    STATE_ONE        1
+#define    STATE_TWO        2
+#define    MODE_DEFAULT     0
 
 typedef struct _Point {
     float    x;
@@ -13,6 +17,15 @@ typedef struct _Color {
     float   blue;
     float   clamp = 0.0;
 } Color;
+
+typedef struct _Block {
+    Point leftTop;
+    Point leftBottom;
+    Point rightTop;
+    Point rightBottom;
+    int mode = MODE_DEFAULT;
+    int state = STATE_ONE;
+} Block;
 
 Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
