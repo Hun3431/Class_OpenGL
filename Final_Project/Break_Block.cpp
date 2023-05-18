@@ -8,11 +8,13 @@
 #define    STATE_TWO        2
 #define    MODE_DEFAULT     0
 
+/// 좌표들의 정보를 나타내는 구조체
 typedef struct _Point {
     float    x;
     float    y;
 } Point;
 
+/// 색상(RGBC)의 정보를 나타내는 구조체
 typedef struct _Color {
     float   red;
     float   green;
@@ -20,6 +22,7 @@ typedef struct _Color {
     float   clamp = 0.0;
 } Color;
 
+/// 벽돌의 정보를 나타내는 구조체
 typedef struct _Block {
     Point leftTop;
     Point leftBottom;
@@ -29,6 +32,7 @@ typedef struct _Block {
     int state = STATE_ONE;
 } Block;
 
+/// 하단의 슬라이딩 바의 정보를 나타내는 구조체
 typedef struct _Bar {
     Point center;
     int len;
@@ -38,7 +42,7 @@ typedef struct _Bar {
 int left = 0;
 int bottom = 0;
 
-/// 슬라이딩 바 초기값
+/// 하단의 슬라이딩 바 초기값 및 선언
 int slidingBarLen = 200;
 int slidingBarWeight = 20;
 int slidingBarPosition = 0;
@@ -62,11 +66,20 @@ Point Wall[] = {
     {  850,    0 }
 };
 
+
+/*
+ *  Shape Color
+ */
 Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
 Color slidingBarColor = { 0.5, 0.8, 0.7 };
 Color ballColor = { 0.97, 0.95, 0.99 };
 
+
+/*
+ *  Show Window Function
+ */
+/// 게임 플레이에 사용되는 공을 그려주는 함수
 void ShowBall() {
     int num = 36;
     float delta = 2 * PI / num;
@@ -77,6 +90,7 @@ void ShowBall() {
     glEnd();
 }
 
+/// 하단의 슬라이딩 바를 그려주는 함수
 void ShowSlidingBar() {
     glBegin(GL_POLYGON);
     glVertex2i(slidingBarPosition + slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y);
@@ -86,6 +100,7 @@ void ShowSlidingBar() {
     glEnd();
 }
 
+/// Window 화면에 게임이 진행될 벽을 그려주는 함수
 void ShowWall() {
     glLineWidth(3.0);
     glBegin(GL_LINE_STRIP);
@@ -95,6 +110,11 @@ void ShowWall() {
     glEnd();
 }
 
+
+/*
+ *  Event Callback Function
+ */
+/// 스페셜 키가 입력되면 실행되는 콜백함수
 void MySpecialKey(int key, int x, int y) {
     switch (key) {
         case GLUT_KEY_LEFT:
@@ -109,6 +129,7 @@ void MySpecialKey(int key, int x, int y) {
     glutPostRedisplay();
 }
 
+/// Window 화면의 크기가 변경되면 실행되는 콜백함수
 void MyReshape(int w, int h) {
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
@@ -116,6 +137,7 @@ void MyReshape(int w, int h) {
     gluOrtho2D(left, left + WIDTH, bottom, bottom + HEIGHT);
 }
 
+/// Window 화면을 출력할 때 실행되는 콜백함수
 void RenderScene(void) {
     glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
     glClear(GL_COLOR_BUFFER_BIT);
