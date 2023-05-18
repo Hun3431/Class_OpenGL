@@ -131,7 +131,7 @@ void MySpecialKey(int key, int x, int y) {
 
 /// Window 화면의 크기가 변경되면 실행되는 콜백함수
 void MyReshape(int w, int h) {
-    glViewport(0, 0, w, h);
+    glViewport((w - WIDTH) / 2, (h - HEIGHT) / 2, WIDTH, HEIGHT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(left, left + WIDTH, bottom, bottom + HEIGHT);
