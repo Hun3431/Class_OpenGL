@@ -27,8 +27,11 @@ typedef struct _Block {
     int state = STATE_ONE;
 } Block;
 
-Color backGroundColor = { 0.1, 0.1, 0.1 };
-Color wallColor = { 0.9, 0.8, 0.5 };
+typedef struct _Bar {
+    Point center;
+    int len;
+    int weight;
+} Bar;
 
 int         left = 0;
 int         bottom = 0;
@@ -44,6 +47,9 @@ Point Wall[] = {
     {  850,  350 },
     {  850,    0 }
 };
+
+Color backGroundColor = { 0.1, 0.1, 0.1 };
+Color wallColor = { 0.9, 0.8, 0.5 };
 
 void ShowWall() {
     glLineWidth(3.0);
