@@ -318,6 +318,37 @@ void ShowWall() {
     glEnd();
 }
 
+/// 직사각형 벽돌을 출력해주는 함수
+void ShowRectangleBlock() {
+    for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
+        if(rectangleBlock[i].state) {
+            switch (rectangleBlock[i].state) {
+                case STATE_ONE:
+                    glColor3f(0.99, 0.4, 0.4);
+                    break;
+                case STATE_TWO:
+                    glColor3f(0.5, 0.8, 0.7);
+                default:
+                    break;
+            }
+            glBegin(GL_POLYGON);
+            glVertex2f(rectangleBlock[i].leftTop.x, rectangleBlock[i].leftTop.y);
+            glVertex2f(rectangleBlock[i].leftBottom.x, rectangleBlock[i].leftBottom.y);
+            glVertex2f(rectangleBlock[i].rightBottom.x, rectangleBlock[i].rightBottom.y);
+            glVertex2f(rectangleBlock[i].rightTop.x, rectangleBlock[i].rightTop.y);
+            glEnd();
+            
+            glColor3f(0, 0, 0);
+            glBegin(GL_LINE_LOOP);
+            glVertex2f(rectangleBlock[i].leftTop.x, rectangleBlock[i].leftTop.y);
+            glVertex2f(rectangleBlock[i].leftBottom.x, rectangleBlock[i].leftBottom.y);
+            glVertex2f(rectangleBlock[i].rightBottom.x, rectangleBlock[i].rightBottom.y);
+            glVertex2f(rectangleBlock[i].rightTop.x, rectangleBlock[i].rightTop.y);
+            glEnd();
+        }
+    }
+}
+
 
 /*
  *  Event Callback Function
@@ -362,6 +393,8 @@ void RenderScene(void) {
 
     glColor3f(wallColor.red, wallColor.green, wallColor.blue);
     ShowWall();
+    
+    ShowRectangleBlock();
     
     // 충돌 검증
     CollisionDetectionToWindow();
