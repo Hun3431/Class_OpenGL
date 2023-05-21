@@ -96,6 +96,11 @@ void CollisionDetectionToWindow() {
     ballSpeed.y *= ballPosition.y - ballRadius <= 0 ? -1 : 1;
 }
 
+/// 두 점과 y 값을 넣으면 x 값을 반환해주는 함수
+float return_X(float y, Point a1, Point a2) {
+    return (y - a1.y) / inclination(a1, a2) + a1.x;
+}
+
 
 /*
  *  Show Window Function
