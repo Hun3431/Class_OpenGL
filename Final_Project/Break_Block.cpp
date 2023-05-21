@@ -9,6 +9,10 @@
 #define    STATE_TWO        2
 #define    MODE_DEFAULT     0
 
+
+/*
+ *  구조체 선언부
+ */
 /// 좌표들의 정보를 나타내는 구조체
 typedef struct _Point {
     float    x;
@@ -40,26 +44,32 @@ typedef struct _Bar {
     int weight;
 } Bar;
 
+
+/*
+ *  변수 선언부
+ */
+/// 가상 공간의 그리기 영역 좌측과 하단을 나타내는 변수
 int left = 0;
 int bottom = 0;
 
-/// 하단의 슬라이딩 바 초기값 및 선언
+/// 하단의 슬라이딩 바 선언 및 초기화
 int slidingBarLen = 200;
 int slidingBarWeight = 20;
 int slidingBarSpeed = 10;
 Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
 
-/// Sliding Bar Power Hit Mode 변수 초기값 및 선언
+/// Sliding Bar Power Hit Mode 변수 선언 및 초기화
 bool powerHitCheck = false;
 float powerHitMax = 50;
 float powerHitGauge = powerHitMax;
 float powerHitVariation;
 
-/// 공 초기값 및 선언
+/// 공 선언 및 초기화
 float ballRadius = 10.0;
 Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius};
 Point ballSpeed = { 0.5, 2.0 };
 
+/// 내부 벽 선언 및 초기화
 Point Wall[] = {
     {  150,    0 },
     {  150,  350 },
