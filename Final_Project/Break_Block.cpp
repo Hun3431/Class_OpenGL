@@ -8,7 +8,7 @@
 #define    STATE_ONE        1
 #define    STATE_TWO        2
 #define    MODE_DEFAULT     0
-
+#define    RECTANGLE_BLOCK_NUM 19
 
 /*
  *  구조체 선언부
@@ -29,10 +29,10 @@ typedef struct _Color {
 
 /// 벽돌의 정보를 나타내는 구조체
 typedef struct _Block {
-    Point leftTop;
-    Point leftBottom;
-    Point rightTop;
-    Point rightBottom;
+    Point leftTop = { 0, 0 };
+    Point leftBottom = { 0, 0 };
+    Point rightTop = { 0, 0 };
+    Point rightBottom = { 0, 0 };
     int mode = MODE_DEFAULT;
     int state = STATE_ONE;
 } Block;
@@ -82,6 +82,11 @@ Point Wall[] = {
     {  850,    0 }
 };
 
+/// 직사각형 벽돌 선언 및 초기화
+Block rectangleBlock[RECTANGLE_BLOCK_NUM];
+int rectangleBlockLen = 100;
+int rectangleBlockWeight = 50;
+
 
 /*
  *  Shape Color
@@ -90,6 +95,56 @@ Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
 Color slidingBarColor = { 0.5, 0.8, 0.7 };
 Color ballColor = { 0.97, 0.95, 0.99 };
+
+
+/*
+ *  Create Function
+ */
+/// 직사각형 벽돌을 생성해주는 함수
+void CreateRectangleBlock() {
+    int startX = 0;
+    int xVariation = 0;
+    int startY = 0;
+    for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
+        if(i < 3) {
+            startX = 350;
+            startY = 650;
+            xVariation = i;
+        }
+        else if(i < 7) {
+            startX = 300;
+            startY = 600;
+            xVariation = i % 4;
+        }
+        else if(i < 12) {
+            startX = 250;
+            startY = 550;
+            xVariation = i % 7;
+        }
+        else if(i < 16) {
+            startX = 300;
+            startY = 500;
+            xVariation = i % 12;
+        }
+        else if(i < 19) {
+            startX = 350;
+            startY = 450;
+            xVariation = i % 16;
+        }
+        
+        rectangleBlock[i].leftTop.x = startX + xVariation * rectangleBlockLen;
+        rectangleBlock[i].leftTop.y = startY;
+        
+        rectangleBlock[i].leftBottom.x = startX + xVariation * rectangleBlockLen;
+        rectangleBlock[i].leftBottom.y = startY - rectangleBlockWeight;
+    
+        rectangleBlock[i].rightTop.x = startX + xVariation * rectangleBlockLen + rectangleBlockLen;
+        rectangleBlock[i].rightTop.y = startY;
+        
+        rectangleBlock[i].rightBottom.x = startX + xVariation * rectangleBlockLen + rectangleBlockLen;
+        rectangleBlock[i].rightBottom.y = startY - rectangleBlockWeight;
+    }
+}
 
 
 /*
@@ -307,8 +362,7 @@ void RenderScene(void) {
 
     glColor3f(wallColor.red, wallColor.green, wallColor.blue);
     ShowWall();
-
-
+    
     // 충돌 검증
     CollisionDetectionToWindow();
     CollisionDetectionToWall();
@@ -324,6 +378,7 @@ void RenderScene(void) {
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
+    CreateRectangleBlock();
     glutInitWindowPosition(0, 0);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(WIDTH, HEIGHT);
