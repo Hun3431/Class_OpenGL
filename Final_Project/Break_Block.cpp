@@ -77,8 +77,18 @@ Color ballColor = { 0.97, 0.95, 0.99 };
 
 
 /*
+ *  Math Function
+ */
+/// 기울기를 반환해주는 함수
+float inclination(Point a1, Point a2) {
+    return (a1.x == a2.x) ? 0 : (a2.y - a1.y) / (a2.x - a1.x);
+}
+
+
+/*
  *  CollisionDetection Function
  */
+/// 외부 벽과의 충돌을 확인하는 함수
 void CollisionDetectionToWindow() {
     ballSpeed.x *= ballPosition.x + ballRadius >= WIDTH ? -1 : 1;
     ballSpeed.x *= ballPosition.x - ballRadius <= 0 ? -1 : 1;
@@ -152,24 +162,25 @@ void MyReshape(int w, int h) {
 void RenderScene(void) {
     glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
     glClear(GL_COLOR_BUFFER_BIT);
-    
+
     // 요소 출력
     glColor3f(ballColor.red, ballColor.green, ballColor.blue);
     ShowBall();
-    
+
     glColor3f(slidingBarColor.red, slidingBarColor.green, slidingBarColor.blue);
     ShowSlidingBar();
-    
+
     glColor3f(wallColor.red, wallColor.green, wallColor.blue);
     ShowWall();
-    
-    
+
+
     // 충돌 검증
     CollisionDetectionToWindow();
-    
+
+    // 공의 위치 결정
     ballPosition.x += ballSpeed.x;
     ballPosition.y += ballSpeed.y;
-    
+
     glutSwapBuffers();
     glFlush();
 }
