@@ -46,7 +46,6 @@ int bottom = 0;
 /// 하단의 슬라이딩 바 초기값 및 선언
 int slidingBarLen = 200;
 int slidingBarWeight = 20;
-int slidingBarPosition = 0;
 int slidingBarSpeed = 10;
 Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
 
@@ -176,7 +175,7 @@ void CollisionDetectionToWall(void){
 /// 슬라이딩바와 충돌을 확인하는 함수
 void CollisionDetectionToSlidingBar() {
     if(ballPosition.y - ballRadius < slidingBar.center.y + slidingBar.weight) {
-        if(ballPosition.x < slidingBar.center.x + slidingBarPosition + slidingBarLen / 2 && ballPosition.x > slidingBar.center.x + slidingBarPosition - slidingBarLen / 2){
+        if(ballPosition.x < slidingBar.center.x + slidingBarLen / 2 && ballPosition.x > slidingBar.center.x - slidingBarLen / 2){
             ballSpeed.y *= -1;
             std::cout << "Detection" << std::endl;
         }
@@ -201,10 +200,10 @@ void ShowBall() {
 /// 하단의 슬라이딩 바를 그려주는 함수
 void ShowSlidingBar() {
     glBegin(GL_POLYGON);
-    glVertex2i(slidingBarPosition + slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y);
-    glVertex2i(slidingBarPosition + slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
-    glVertex2i(slidingBarPosition + slidingBar.center.x + slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
-    glVertex2i(slidingBarPosition + slidingBar.center.x + slidingBar.len / 2, slidingBar.center.y);
+    glVertex2i(slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y);
+    glVertex2i(slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
+    glVertex2i(slidingBar.center.x + slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
+    glVertex2i(slidingBar.center.x + slidingBar.len / 2, slidingBar.center.y);
     glEnd();
 }
 
@@ -226,10 +225,10 @@ void ShowWall() {
 void MySpecialKey(int key, int x, int y) {
     switch (key) {
         case GLUT_KEY_LEFT:
-            slidingBarPosition -= slidingBarPosition + slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
+            slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
             break;
         case GLUT_KEY_RIGHT:
-            slidingBarPosition += slidingBarPosition + slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
+            slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
             break;
         default:
             break;
