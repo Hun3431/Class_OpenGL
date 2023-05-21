@@ -49,6 +49,12 @@ int slidingBarWeight = 20;
 int slidingBarSpeed = 10;
 Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
 
+/// Sliding Bar Power Hit Mode 변수 초기값 및 선언
+bool powerHitCheck = false;
+float powerHitMax = 50;
+float powerHitGauge = powerHitMax;
+float powerHitVariation;
+
 /// 공 초기값 및 선언
 float ballRadius = 10.0;
 Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius};
@@ -92,6 +98,35 @@ float return_X(float y, Point a1, Point a2) {
 /// 두 점과 x 값을 넣으면 y 값을 반환해주는 함수
 float return_Y(float x, Point a1, Point a2) {
     return inclination(a1, a2) * x - a1.x + a1.y;
+}
+
+
+/*
+ *  SpecialMode Function
+ */
+/// Sliding Bar Power Hit Mode
+void PowerHit() {
+    std::cout << powerHitGauge << std::endl;
+    if(powerHitCheck) {
+        if(powerHitGauge > slidingBar.center.y) {
+            slidingBar.center.y += powerHitVariation;
+        }
+        else {
+            powerHitCheck = false;
+            powerHitGauge = 0;
+        }
+    }
+    else {
+        if(slidingBar.center.y > 0) {
+            slidingBar.center.y -= powerHitVariation;
+        }
+        if(slidingBar.center.y < 0) {
+            slidingBar.center.y = 0;
+        }
+        if(slidingBar.center.y == 0) {
+            powerHitGauge += powerHitGauge < powerHitMax ? 0.1 : 0;
+        }
+    }
 }
 
 
@@ -199,6 +234,7 @@ void ShowBall() {
 
 /// 하단의 슬라이딩 바를 그려주는 함수
 void ShowSlidingBar() {
+    PowerHit();
     glBegin(GL_POLYGON);
     glVertex2i(slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y);
     glVertex2i(slidingBar.center.x - slidingBar.len / 2, slidingBar.center.y + slidingBar.weight);
@@ -230,6 +266,9 @@ void MySpecialKey(int key, int x, int y) {
         case GLUT_KEY_RIGHT:
             slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
             break;
+        case 32:
+            powerHitCheck = true;
+            powerHitVariation = powerHitGauge / 20;
         default:
             break;
     }
