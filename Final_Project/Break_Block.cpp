@@ -52,8 +52,8 @@ Bar slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
 
 /// 공 초기값 및 선언
 float ballRadius = 10.0;
-Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
-Point ballSpeed = { 1.0, 3.0 };
+Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius};
+Point ballSpeed = { 0.5, 2.0 };
 
 Point Wall[] = {
     {  150,    0 },
@@ -173,6 +173,16 @@ void CollisionDetectionToWall(void){
     }
 }
 
+/// 슬라이딩바와 충돌을 확인하는 함수
+void CollisionDetectionToSlidingBar() {
+    if(ballPosition.y - ballRadius < slidingBar.center.y + slidingBar.weight) {
+        if(ballPosition.x < slidingBar.center.x + slidingBarPosition + slidingBarLen / 2 && ballPosition.x > slidingBar.center.x + slidingBarPosition - slidingBarLen / 2){
+            ballSpeed.y *= -1;
+            std::cout << "Detection" << std::endl;
+        }
+    }
+}
+
 
 /*
  *  Show Window Function
@@ -254,7 +264,7 @@ void RenderScene(void) {
     // 충돌 검증
     CollisionDetectionToWindow();
     CollisionDetectionToWall();
-    
+    CollisionDetectionToSlidingBar();
     
     // 공의 위치 결정
     ballPosition.x += ballSpeed.x;
