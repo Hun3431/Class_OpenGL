@@ -34,7 +34,7 @@ typedef struct _Block {
     Point rightTop = { 0, 0 };
     Point rightBottom = { 0, 0 };
     int mode = MODE_DEFAULT;
-    int state = STATE_ONE;
+    int state = STATE_TWO;
 } Block;
 
 /// 하단의 슬라이딩 바의 정보를 나타내는 구조체
@@ -66,7 +66,7 @@ float powerHitVariation;
 
 /// 공 선언 및 초기화
 float ballRadius = 10.0;
-Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius};
+Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
 Point ballSpeed = { 0.5, 2.0 };
 
 /// 내부 벽 선언 및 초기화
@@ -93,7 +93,7 @@ int rectangleBlockWeight = 50;
  */
 Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
-Color slidingBarColor = { 0.5, 0.8, 0.7 };
+Color slidingBarColor = { 0.6, 0.8, 0.95 };
 Color ballColor = { 0.97, 0.95, 0.99 };
 
 
@@ -282,6 +282,30 @@ void CollisionDetectionToSlidingBar() {
     }
 }
 
+/// 직사각형 벽돌과의 충돌을 확인하는 함수
+void CollisionDetectionToRectangleBlock() {
+    for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
+        if(rectangleBlock[i].state) {
+            // y 조건1 : 아래에서 공이 들어온 경우 | 공이 벽돌에 다였거나, 공이 벽돌 안에 있는 경우
+            if(ballPosition.y + ballRadius >= rectangleBlock[i].leftBottom.y && ballPosition.y < rectangleBlock[i].leftTop.y) {
+                if(ballPosition.x + ballRadius >= rectangleBlock[i].leftBottom.x && ballPosition.x - ballRadius <= rectangleBlock[i].rightBottom.x){
+                    ballSpeed.y *= -1;
+                    rectangleBlock[i].state --;
+                    break;
+                }
+            }
+            // y 조건2 :  위에서 공이 들어온 경우 | 공이 벽돌에 다였거나, 공이 벽돌 안에 있는 경우
+            else if(ballPosition.y - ballRadius <= rectangleBlock[i].leftTop.y && ballPosition.y > rectangleBlock[i].leftBottom.y) {
+                if(ballPosition.x + ballRadius >= rectangleBlock[i].leftTop.x && ballPosition.x - ballRadius <= rectangleBlock[i].rightTop.x){
+                    ballSpeed.y *= -1;
+                    rectangleBlock[i].state --;
+                    break;
+                }
+            }
+        }
+    }
+}
+
 
 /*
  *  Show Window Function
@@ -400,6 +424,7 @@ void RenderScene(void) {
     CollisionDetectionToWindow();
     CollisionDetectionToWall();
     CollisionDetectionToSlidingBar();
+    CollisionDetectionToRectangleBlock();
     
     // 공의 위치 결정
     ballPosition.x += ballSpeed.x;
@@ -422,3 +447,4 @@ int main(int argc, char** argv) {
     glutIdleFunc(RenderScene);
     glutMainLoop();
 }
+
