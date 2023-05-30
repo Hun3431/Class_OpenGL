@@ -166,6 +166,16 @@ float return_Y(float x, Point a1, Point a2) {
 }
 
 
+/// 벽돌의 갯수를 반환하는 함수
+int CountBlock() {
+    int count = 0;
+    for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
+        count += rectangleBlock[i].state;
+    }
+    return count;
+}
+
+
 /*
  *  SpecialMode Function
  */
