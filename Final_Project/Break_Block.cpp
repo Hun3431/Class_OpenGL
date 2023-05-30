@@ -67,7 +67,7 @@ float powerHitVariation;
 /// 공 선언 및 초기화
 float ballRadius = 10.0;
 Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
-Point ballSpeed = { 0.5, 2.0 };
+Point ballSpeed = { 1.5, 8.0 };
 
 /// 내부 벽 선언 및 초기화
 Point Wall[] = {
@@ -181,7 +181,7 @@ int CountBlock() {
  */
 /// Sliding Bar Power Hit Mode
 void PowerHit() {
-    std::cout << powerHitGauge << std::endl;
+    //std::cout << powerHitGauge << std::endl;
     if(powerHitCheck) {
         if(powerHitGauge > slidingBar.center.y) {
             slidingBar.center.y += powerHitVariation;
@@ -224,6 +224,7 @@ void CollisionDetectionToWall(void){
             if (Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) >= ballPosition.x - ballRadius) {
                     ballSpeed.x *= -1;
+                    ballSpeed.y *= -1;
                 }
             }
         }
@@ -248,6 +249,7 @@ void CollisionDetectionToWall(void){
             if (Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) <= ballPosition.x + ballRadius) {
                     ballSpeed.x *= -1;
+                    ballSpeed.y *= -1;
                 }
             }
         }
@@ -287,7 +289,7 @@ void CollisionDetectionToSlidingBar() {
     if(ballPosition.y - ballRadius < slidingBar.center.y + slidingBar.weight) {
         if(ballPosition.x < slidingBar.center.x + slidingBarLen / 2 && ballPosition.x > slidingBar.center.x - slidingBarLen / 2){
             ballSpeed.y *= -1;
-            std::cout << "Detection" << std::endl;
+            //std::cout << "Detection" << std::endl;
         }
     }
 }
@@ -436,10 +438,14 @@ void RenderScene(void) {
     CollisionDetectionToSlidingBar();
     CollisionDetectionToRectangleBlock();
     
-    // 공의 위치 결정
-    ballPosition.x += ballSpeed.x;
-    ballPosition.y += ballSpeed.y;
-
+    if(CountBlock()) {
+        // 공의 위치 결정
+        ballPosition.x += ballSpeed.x;
+        ballPosition.y += ballSpeed.y;
+    }
+    
+    std::cout << CountBlock() << std::endl;
+    
     glutSwapBuffers();
     glFlush();
 }
