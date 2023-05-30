@@ -87,6 +87,7 @@ Block rectangleBlock[RECTANGLE_BLOCK_NUM];
 int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
+bool pause = true;
 
 /*
  *  Shape Color
@@ -401,6 +402,10 @@ void MySpecialKey(int key, int x, int y) {
         case 32:
             powerHitCheck = true;
             powerHitVariation = powerHitGauge / 20;
+            break;
+        case 27:
+            pause = pause ? false : true;
+            break;
         default:
             break;
     }
@@ -438,13 +443,11 @@ void RenderScene(void) {
     CollisionDetectionToSlidingBar();
     CollisionDetectionToRectangleBlock();
     
-    if(CountBlock()) {
+    if(CountBlock() && pause) {
         // 공의 위치 결정
         ballPosition.x += ballSpeed.x;
         ballPosition.y += ballSpeed.y;
     }
-    
-    std::cout << CountBlock() << std::endl;
     
     glutSwapBuffers();
     glFlush();
