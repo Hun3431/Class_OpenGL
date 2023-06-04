@@ -44,6 +44,29 @@ typedef struct _Bar {
     int weight;
 } Bar;
 
+/// 벡터를 나타내는 구조체
+struct Vector {
+    float x;
+    float y;
+
+    Vector(float _x = 0.0f, float _y = 0.0f) {
+        x = _x;
+        y = _y;
+    }
+
+    // 벡터 정규화
+    void normalize() {
+        float length = std::sqrt(x * x + y * y);
+        x /= length;
+        y /= length;
+    }
+
+    // 벡터 내적
+    float dot(const Vector& other) const {
+        return x * other.x + y * other.y;
+    }
+};
+
 
 /*
  *  변수 선언부
@@ -132,16 +155,16 @@ void CreateRectangleBlock() {
             startY = 450;
             xVariation = i % 16;
         }
-        
+
         rectangleBlock[i].leftTop.x = startX + xVariation * rectangleBlockLen;
         rectangleBlock[i].leftTop.y = startY;
-        
+
         rectangleBlock[i].leftBottom.x = startX + xVariation * rectangleBlockLen;
         rectangleBlock[i].leftBottom.y = startY - rectangleBlockWeight;
-    
+
         rectangleBlock[i].rightTop.x = startX + xVariation * rectangleBlockLen + rectangleBlockLen;
         rectangleBlock[i].rightTop.y = startY;
-        
+
         rectangleBlock[i].rightBottom.x = startX + xVariation * rectangleBlockLen + rectangleBlockLen;
         rectangleBlock[i].rightBottom.y = startY - rectangleBlockWeight;
     }
@@ -233,7 +256,12 @@ void CollisionDetectionToWall(void){
         else if(i == 4) {
             if (Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) <= ballPosition.x + ballRadius) {
-                    ballSpeed.x *= -1;
+                    float temp = ballSpeed.x;
+                    ballSpeed.x = ballSpeed.y;
+                    ballSpeed.y = temp;
+                    
+                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
+                    ballPosition.y -= ballRadius;
                 }
             }
         }
@@ -241,7 +269,12 @@ void CollisionDetectionToWall(void){
         else if(i == 3) {
             if (Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) >= ballPosition.x - ballRadius) {
-                    ballSpeed.x *= -1;
+                    float temp = ballSpeed.x;
+                    ballSpeed.x = ballSpeed.y;
+                    ballSpeed.y = temp;
+                    
+                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) + ballRadius;
+                    ballPosition.y -= ballRadius;
                 }
             }
         }
@@ -374,7 +407,7 @@ void ShowRectangleBlock() {
             glVertex2f(rectangleBlock[i].rightBottom.x, rectangleBlock[i].rightBottom.y);
             glVertex2f(rectangleBlock[i].rightTop.x, rectangleBlock[i].rightTop.y);
             glEnd();
-            
+
             glColor3f(0, 0, 0);
             glBegin(GL_LINE_LOOP);
             glVertex2f(rectangleBlock[i].leftTop.x, rectangleBlock[i].leftTop.y);
@@ -434,21 +467,21 @@ void RenderScene(void) {
 
     glColor3f(wallColor.red, wallColor.green, wallColor.blue);
     ShowWall();
-    
+
     ShowRectangleBlock();
-    
+
     // 충돌 검증
     CollisionDetectionToWindow();
     CollisionDetectionToWall();
     CollisionDetectionToSlidingBar();
     CollisionDetectionToRectangleBlock();
-    
+
     if(CountBlock() && pause) {
         // 공의 위치 결정
         ballPosition.x += ballSpeed.x;
         ballPosition.y += ballSpeed.y;
     }
-    
+
     glutSwapBuffers();
     glFlush();
 }
