@@ -66,6 +66,23 @@ struct Vector {
     float dot(const Vector& other) const {
         return x * other.x + y * other.y;
     }
+    
+    // 벡터의 반사
+    Vector reflect(const Vector& normal) const {
+        float dotProduct = dot(normal);
+        Vector reflection = *this - (normal * (2.0f * dotProduct));
+        return reflection;
+    }
+
+    // 벡터 뺄셈 연산자 오버로딩
+    Vector operator-(const Vector& other) const {
+        return Vector(x - other.x, y - other.y);
+    }
+
+    // 스칼라 곱 연산자 오버로딩
+    Vector operator*(float scalar) const {
+        return Vector(x * scalar, y * scalar);
+    }
 };
 
 
@@ -91,7 +108,10 @@ float powerHitVariation;
 /// 공 선언 및 초기화
 float ballRadius = 10.0;
 Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
-Vector ballSpeed = { 1.5, 8.0 };
+float speedX = 1.5;
+float speedY = 8.0;
+float speedSum = sqrt(speedX * speedX + speedY * speedY);
+Vector ballSpeed = { speedX, speedY };
 
 /// 내부 벽 선언 및 초기화
 Point Wall[WALL_NUM] = {
@@ -105,6 +125,9 @@ Point Wall[WALL_NUM] = {
     {  850,  350 },
     {  850,    0 }
 };
+
+/// 내부 벽 법선벡터
+Vector nomalWall[WALL_NUM - 1];
 
 /// 직사각형 벽돌 선언 및 초기화
 Block rectangleBlock[RECTANGLE_BLOCK_NUM];
@@ -120,6 +143,18 @@ Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
 Color slidingBarColor = { 0.6, 0.8, 0.95 };
 Color ballColor = { 0.97, 0.95, 0.99 };
+
+/*
+ *  Initial Function
+ */
+///
+void InitWall() {
+    for(int i = 0; i < WALL_NUM - 1; i ++) {
+        Vector v = { Wall[i + 1].x - Wall[i].x, Wall[i + 1].y - Wall[i].y };
+        nomalWall[i] = { v.y, -v.x };
+        std::cout << i << ":" << nomalWall[i].x << "|" << nomalWall[i].y << std::endl;
+    }
+}
 
 
 /*
@@ -248,8 +283,18 @@ void CollisionDetectionToWall(void){
         if(i == 1) {
             if (Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) >= ballPosition.x - ballRadius) {
-                    ballSpeed.x *= -1;
-                    ballSpeed.y *= -1;
+                    // 벡터의 정규화
+                    ballSpeed.normalize();
+                    nomalWall[i].normalize();
+
+                    // 반사 벡터 계산
+                    Vector v = ballSpeed.reflect(nomalWall[i]);
+                    ballSpeed.x = v.x;
+                    ballSpeed.y = v.y;
+                    
+                    // 공 위치 조정(벽을 넘어가지 않도록)
+                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) + ballRadius;
+                    ballPosition.y += ballRadius;
                 }
             }
         }
@@ -257,10 +302,16 @@ void CollisionDetectionToWall(void){
         else if(i == 4) {
             if (Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) <= ballPosition.x + ballRadius) {
-                    float temp = ballSpeed.x;
-                    ballSpeed.x = ballSpeed.y;
-                    ballSpeed.y = temp;
+                    // 벡터의 정규화
+                    ballSpeed.normalize();
+                    nomalWall[i].normalize();
+
+                    // 반사 벡터 계산
+                    Vector v = ballSpeed.reflect(nomalWall[i]);
+                    ballSpeed.x = v.x;
+                    ballSpeed.y = v.y;
                     
+                    // 공 위치 조정(벽을 넘어가지 않도록)
                     ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
                     ballPosition.y -= ballRadius;
                 }
@@ -270,11 +321,17 @@ void CollisionDetectionToWall(void){
         else if(i == 3) {
             if (Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) >= ballPosition.x - ballRadius) {
-                    float temp = ballSpeed.x;
-                    ballSpeed.x = ballSpeed.y;
-                    ballSpeed.y = temp;
+                    // 벡터의 정규화
+                    ballSpeed.normalize();
+                    nomalWall[i].normalize();
+
+                    // 반사 벡터 계산
+                    Vector v = ballSpeed.reflect(nomalWall[i]);
+                    ballSpeed.x = v.x;
+                    ballSpeed.y = v.y;
                     
-                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) + ballRadius;
+                    // 공 위치 조정(벽을 넘어가지 않도록)
+                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
                     ballPosition.y -= ballRadius;
                 }
             }
@@ -283,8 +340,18 @@ void CollisionDetectionToWall(void){
         else if(i == 6) {
             if (Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) <= ballPosition.x + ballRadius) {
-                    ballSpeed.x *= -1;
-                    ballSpeed.y *= -1;
+                    // 벡터의 정규화
+                    ballSpeed.normalize();
+                    nomalWall[i].normalize();
+
+                    // 반사 벡터 계산
+                    Vector v = ballSpeed.reflect(nomalWall[i]);
+                    ballSpeed.x = v.x;
+                    ballSpeed.y = v.y;
+                    
+                    // 공 위치 조정(벽을 넘어가지 않도록)
+                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
+                    ballPosition.y += ballRadius;
                 }
             }
         }
@@ -488,6 +555,7 @@ void RenderScene(void) {
 }
 
 int main(int argc, char** argv) {
+    InitWall();
     glutInit(&argc, argv);
     CreateRectangleBlock();
     glutInitWindowPosition(0, 0);
