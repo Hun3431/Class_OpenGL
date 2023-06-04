@@ -225,7 +225,6 @@ float return_Y(float x, Point a1, Point a2) {
     return inclination(a1, a2) * x - a1.x + a1.y;
 }
 
-
 /// 벽돌의 갯수를 반환하는 함수
 int CountBlock() {
     int count = 0;
@@ -297,6 +296,8 @@ void CollisionDetectionToWall(void){
                     // 공 위치 조정(벽을 넘어가지 않도록)
                     ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) + ballRadius;
                     ballPosition.y += ballRadius;
+                    
+                    return;
                 }
             }
         }
@@ -318,6 +319,8 @@ void CollisionDetectionToWall(void){
                     // 공 위치 조정(벽을 넘어가지 않도록)
                     ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
                     ballPosition.y -= ballRadius;
+                    
+                    return;
                 }
             }
         }
@@ -339,6 +342,8 @@ void CollisionDetectionToWall(void){
                     // 공 위치 조정(벽을 넘어가지 않도록)
                     ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) + ballRadius;
                     ballPosition.y -= ballRadius;
+                    
+                    return;
                 }
             }
         }
@@ -360,6 +365,8 @@ void CollisionDetectionToWall(void){
                     // 공 위치 조정(벽을 넘어가지 않도록)
                     ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
                     ballPosition.y += ballRadius;
+                    
+                    return;
                 }
             }
         }
@@ -368,6 +375,8 @@ void CollisionDetectionToWall(void){
             if(Wall[i].x >= ballPosition.x - ballRadius && Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
                 ballSpeed.x *= -1;
                 ballPosition.x = Wall[i].x + ballRadius;
+                
+                return;
             }
         }
         /// 우측 y 축에 평행한 직선
@@ -375,6 +384,8 @@ void CollisionDetectionToWall(void){
             if(Wall[i].x <= ballPosition.x + ballRadius && Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
                 ballSpeed.x *= -1;
                 ballPosition.x = Wall[i].x - ballRadius;
+                
+                return;
             }
         }
         /// 좌측 x 축에 평행한 직선
@@ -383,6 +394,8 @@ void CollisionDetectionToWall(void){
                 if(Wall[i].y <= ballPosition.y + ballRadius) {
                     ballSpeed.y *= -1;
                     ballPosition.y = Wall[i].y - ballRadius;
+                    
+                    return;
                 }
             }
         }
@@ -392,6 +405,8 @@ void CollisionDetectionToWall(void){
                 if(Wall[i].y <= ballPosition.y + ballRadius) {
                     ballSpeed.y *= -1;
                     ballPosition.y = Wall[i].y - ballRadius;
+                    
+                    return;
                 }
             }
         }
@@ -431,6 +446,21 @@ void CollisionDetectionToRectangleBlock() {
         }
     }
 }
+
+/// 벽면 모서리와의 충돌을 확인하는 함수
+void CollisionDetectionToCorner() {
+    for(int i = 1; i < WALL_NUM - 1; i ++) {
+        float distance = (ballPosition.x - Wall[i].x) * (ballPosition.x - Wall[i].x) + (ballPosition.y - Wall[i].y) * (ballPosition.y - Wall[i].y);
+        if(distance <= ballRadius * ballRadius) {
+            Vector v = nomalWall[i - 1] - nomalWall[i];
+            float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                
+            ballSpeed.x = v.x * (speedSum / vSum / 2);
+            ballSpeed.y = v.y * (speedSum / vSum / 2);
+        }
+    }
+}
+
 
 
 /*
