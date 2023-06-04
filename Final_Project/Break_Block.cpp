@@ -104,12 +104,13 @@ bool powerHitCheck = false;
 float powerHitMax = 50;
 float powerHitGauge = powerHitMax;
 float powerHitVariation;
+bool powerShut = false;
 
 /// 공 선언 및 초기화
 float ballRadius = 10.0;
 Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
-float speedX = 1.5;
-float speedY = 8.0;
+float speedX = 0.5;
+float speedY = 2.0;
 float speedSum = sqrt(speedX * speedX + speedY * speedY);
 Vector ballSpeed = { speedX, speedY };
 
@@ -234,6 +235,13 @@ int CountBlock() {
     return count;
 }
 
+/// 공의 속도를 변환하는 함수
+void ChangeSpeed(float change) {
+    speedX *= change;
+    speedY *= change;
+    speedSum = sqrt(speedX * speedX + speedY * speedY);
+}
+
 
 /*
  *  SpecialMode Function
@@ -246,6 +254,9 @@ void PowerHit() {
             slidingBar.center.y += powerHitVariation;
         }
         else {
+            powerShut = false;
+            ChangeSpeed(1.2);
+            speedY *= speedY < 0 ? -1 : 1;
             powerHitCheck = false;
             powerHitGauge = 0;
         }
@@ -417,6 +428,9 @@ void CollisionDetectionToWall(void){
 void CollisionDetectionToSlidingBar() {
     if(ballPosition.y - ballRadius < slidingBar.center.y + slidingBar.weight) {
         if(ballPosition.x < slidingBar.center.x + slidingBarLen / 2 && ballPosition.x > slidingBar.center.x - slidingBarLen / 2){
+            if(powerHitCheck) {
+                powerShut = true;
+            }
             ballSpeed.y *= -1;
             //std::cout << "Detection" << std::endl;
         }
@@ -549,6 +563,7 @@ void ShowBall() {
     int num = 36;
     float delta = 2 * PI / num;
     glBegin(GL_POLYGON);
+    ballPosition.y = powerShut ? slidingBar.center.y + slidingBarWeight + ballRadius + 3 : ballPosition.y;
     for(int i = 0; i < num; i ++) {
         glVertex2f(ballPosition.x + ballRadius * cos(delta * i), ballPosition.y + ballRadius * sin(delta * i));
     }
@@ -620,10 +635,14 @@ void MySpecialKey(int key, int x, int y) {
         case GLUT_KEY_RIGHT:
             slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
             break;
+        // 슬라이딩바를 움직여 공의 속도 상승
         case 32:
-            powerHitCheck = true;
-            powerHitVariation = powerHitGauge / 20;
+            if (powerHitGauge > 30){
+                powerHitCheck = true;
+                powerHitVariation = powerHitGauge / 20;
+            }
             break;
+        // 게임 일시정지
         case 27:
             pause = pause ? false : true;
             break;
@@ -666,7 +685,7 @@ void RenderScene(void) {
 
     if(CountBlock() && pause) {
         // 공의 위치 결정
-        ballPosition.x += ballSpeed.x;
+        ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
         ballPosition.y += ballSpeed.y;
     }
 
