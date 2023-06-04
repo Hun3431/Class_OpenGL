@@ -427,12 +427,84 @@ void CollisionDetectionToSlidingBar() {
 void CollisionDetectionToRectangleBlock() {
     for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
         if(rectangleBlock[i].state) {
+            // 벽돌의 모서리와의 충돌을 확인
+            // 좌측 하단
+            float distance = pow(ballPosition.x - rectangleBlock[i].leftBottom.x, 2) + pow(ballPosition.y - rectangleBlock[i].leftBottom.y, 2);
+            if(distance <= ballRadius * ballRadius) {
+                Vector b = { -2.0, -1.0 };
+                b.normalize();
+                ballSpeed.normalize();
+                
+                Vector v = ballSpeed.reflect(b);
+                float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                    
+                ballSpeed.x = v.x * (speedSum / vSum / 2);
+                ballSpeed.y = v.y * (speedSum / vSum / 2);
+                
+                rectangleBlock[i].state --;
+                
+                return;
+            }
+            
+            // 우측 하단
+            distance = pow(ballPosition.x - rectangleBlock[i].rightBottom.x, 2) + pow(ballPosition.y - rectangleBlock[i].rightBottom.y, 2);
+            if(distance <= ballRadius * ballRadius) {
+                Vector b = { 2.0, -1.0 };
+                b.normalize();
+                ballSpeed.normalize();
+                
+                Vector v = ballSpeed.reflect(b);
+                float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                    
+                ballSpeed.x = v.x * (speedSum / vSum / 2);
+                ballSpeed.y = v.y * (speedSum / vSum / 2);
+                
+                rectangleBlock[i].state --;
+                
+                return;
+            }
+            
+            // 우측 상단
+            distance = pow(ballPosition.x - rectangleBlock[i].rightTop.x, 2) + pow(ballPosition.y - rectangleBlock[i].rightTop.y, 2);
+            if(distance <= ballRadius * ballRadius) {
+                Vector b = { 2.0, 1.0 };
+                b.normalize();
+                ballSpeed.normalize();
+                
+                Vector v = ballSpeed.reflect(b);
+                float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                    
+                ballSpeed.x = v.x * (speedSum / vSum / 2);
+                ballSpeed.y = v.y * (speedSum / vSum / 2);
+                
+                rectangleBlock[i].state --;
+                
+                return;
+            }
+            
+            // 좌측 상단
+            distance = pow(ballPosition.x - rectangleBlock[i].leftTop.x, 2) + pow(ballPosition.y - rectangleBlock[i].leftTop.y, 2);
+            if(distance <= ballRadius * ballRadius) {
+                Vector b = { -2.0, 1.0 };
+                b.normalize();
+                ballSpeed.normalize();
+                
+                Vector v = ballSpeed.reflect(b);
+                float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                    
+                ballSpeed.x = v.x * (speedSum / vSum / 2);
+                ballSpeed.y = v.y * (speedSum / vSum / 2);
+                
+                rectangleBlock[i].state --;
+                
+                return;
+            }
+            
             // 공이 벽돌과 충돌을 확인
             if(ballPosition.y + ballRadius >= rectangleBlock[i].leftBottom.y && ballPosition.y - ballRadius <= rectangleBlock[i].leftTop.y) {
                 if(ballPosition.x + ballRadius >= rectangleBlock[i].leftBottom.x && ballPosition.x - ballRadius <= rectangleBlock[i].rightBottom.x){
-//                    ballSpeed.y *= -1;
+                    
                     rectangleBlock[i].state --;
-//                    break;
                     
                     Point _block;
                     _block.x = rectangleBlock[i].leftBottom.x + rectangleBlockLen / 2;
@@ -445,6 +517,8 @@ void CollisionDetectionToRectangleBlock() {
                     else {
                         ballSpeed.y *= -1;
                     }
+                    
+                    return;
                 }
             }
         }
