@@ -289,8 +289,10 @@ void CollisionDetectionToWall(void){
 
                     // 반사 벡터 계산
                     Vector v = ballSpeed.reflect(nomalWall[i]);
-                    ballSpeed.x = v.x;
-                    ballSpeed.y = v.y;
+                    float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                        
+                    ballSpeed.x = v.x * (speedSum / vSum / 2);
+                    ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
                     // 공 위치 조정(벽을 넘어가지 않도록)
                     ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) + ballRadius;
@@ -308,8 +310,10 @@ void CollisionDetectionToWall(void){
 
                     // 반사 벡터 계산
                     Vector v = ballSpeed.reflect(nomalWall[i]);
-                    ballSpeed.x = v.x;
-                    ballSpeed.y = v.y;
+                    float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                        
+                    ballSpeed.x = v.x * (speedSum / vSum / 2);
+                    ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
                     // 공 위치 조정(벽을 넘어가지 않도록)
                     ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
@@ -327,11 +331,13 @@ void CollisionDetectionToWall(void){
 
                     // 반사 벡터 계산
                     Vector v = ballSpeed.reflect(nomalWall[i]);
-                    ballSpeed.x = v.x;
-                    ballSpeed.y = v.y;
+                    float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                        
+                    ballSpeed.x = v.x * (speedSum / vSum / 2);
+                    ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
                     // 공 위치 조정(벽을 넘어가지 않도록)
-                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
+                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) + ballRadius;
                     ballPosition.y -= ballRadius;
                 }
             }
@@ -346,8 +352,10 @@ void CollisionDetectionToWall(void){
 
                     // 반사 벡터 계산
                     Vector v = ballSpeed.reflect(nomalWall[i]);
-                    ballSpeed.x = v.x;
-                    ballSpeed.y = v.y;
+                    float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                        
+                    ballSpeed.x = v.x * (speedSum / vSum / 2);
+                    ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
                     // 공 위치 조정(벽을 넘어가지 않도록)
                     ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
@@ -359,12 +367,14 @@ void CollisionDetectionToWall(void){
         else if(i == 0) {
             if(Wall[i].x >= ballPosition.x - ballRadius && Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
                 ballSpeed.x *= -1;
+                ballPosition.x = Wall[i].x + ballRadius;
             }
         }
         /// 우측 y 축에 평행한 직선
         else if(i == 7) {
             if(Wall[i].x <= ballPosition.x + ballRadius && Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
                 ballSpeed.x *= -1;
+                ballPosition.x = Wall[i].x - ballRadius;
             }
         }
         /// 좌측 x 축에 평행한 직선
@@ -372,6 +382,7 @@ void CollisionDetectionToWall(void){
             if(Wall[i].x <= ballPosition.x + ballRadius && Wall[i + 1].x >= ballPosition.x - ballRadius) {
                 if(Wall[i].y <= ballPosition.y + ballRadius) {
                     ballSpeed.y *= -1;
+                    ballPosition.y = Wall[i].y - ballRadius;
                 }
             }
         }
@@ -380,6 +391,7 @@ void CollisionDetectionToWall(void){
             if(Wall[i].x <= ballPosition.x + ballRadius && Wall[i + 1].x >= ballPosition.x - ballRadius) {
                 if(Wall[i].y <= ballPosition.y + ballRadius) {
                     ballSpeed.y *= -1;
+                    ballPosition.y = Wall[i].y - ballRadius;
                 }
             }
         }
