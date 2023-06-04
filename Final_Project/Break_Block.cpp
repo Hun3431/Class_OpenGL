@@ -90,7 +90,7 @@ float powerHitVariation;
 /// 공 선언 및 초기화
 float ballRadius = 10.0;
 Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
-Point ballSpeed = { 1.5, 8.0 };
+Vector ballSpeed = { 1.5, 8.0 };
 
 /// 내부 벽 선언 및 초기화
 Point Wall[] = {
@@ -499,4 +499,6 @@ int main(int argc, char** argv) {
     glutIdleFunc(RenderScene);
     glutMainLoop();
 }
+
+
 
