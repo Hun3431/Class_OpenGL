@@ -9,6 +9,7 @@
 #define    STATE_TWO        2
 #define    MODE_DEFAULT     0
 #define    RECTANGLE_BLOCK_NUM 19
+#define    WALL_NUM         9
 
 /*
  *  구조체 선언부
@@ -93,7 +94,7 @@ Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
 Vector ballSpeed = { 1.5, 8.0 };
 
 /// 내부 벽 선언 및 초기화
-Point Wall[] = {
+Point Wall[WALL_NUM] = {
     {  150,    0 },
     {  150,  350 },
     {    0,  700 },
@@ -242,7 +243,7 @@ void CollisionDetectionToWindow() {
 
 /// 내부 벽과의 충돌을 확인하는 함수
 void CollisionDetectionToWall(void){
-    for(int i = 0; i < 8; i ++) {
+    for(int i = 0; i < WALL_NUM - 1; i ++) {
         /// 좌측 기울기가 - 인 대각선
         if(i == 1) {
             if (Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
@@ -382,7 +383,7 @@ void ShowSlidingBar() {
 void ShowWall() {
     glLineWidth(3.0);
     glBegin(GL_LINE_STRIP);
-    for(int i = 0; i < 9; i ++) {
+    for(int i = 0; i < WALL_NUM; i ++) {
         glVertex2f(Wall[i].x, Wall[i].y);
     }
     glEnd();
