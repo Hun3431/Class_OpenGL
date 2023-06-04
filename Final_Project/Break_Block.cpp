@@ -428,16 +428,8 @@ void CollisionDetectionToRectangleBlock() {
     for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
         if(rectangleBlock[i].state) {
             // y 조건1 : 아래에서 공이 들어온 경우 | 공이 벽돌에 다였거나, 공이 벽돌 안에 있는 경우
-            if(ballPosition.y + ballRadius >= rectangleBlock[i].leftBottom.y && ballPosition.y < rectangleBlock[i].leftTop.y) {
+            if(ballPosition.y + ballRadius >= rectangleBlock[i].leftBottom.y && ballPosition.y - ballRadius <= rectangleBlock[i].leftTop.y) {
                 if(ballPosition.x + ballRadius >= rectangleBlock[i].leftBottom.x && ballPosition.x - ballRadius <= rectangleBlock[i].rightBottom.x){
-                    ballSpeed.y *= -1;
-                    rectangleBlock[i].state --;
-                    break;
-                }
-            }
-            // y 조건2 :  위에서 공이 들어온 경우 | 공이 벽돌에 다였거나, 공이 벽돌 안에 있는 경우
-            else if(ballPosition.y - ballRadius <= rectangleBlock[i].leftTop.y && ballPosition.y > rectangleBlock[i].leftBottom.y) {
-                if(ballPosition.x + ballRadius >= rectangleBlock[i].leftTop.x && ballPosition.x - ballRadius <= rectangleBlock[i].rightTop.x){
                     ballSpeed.y *= -1;
                     rectangleBlock[i].state --;
                     break;
