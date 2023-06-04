@@ -16,8 +16,8 @@
  */
 /// 좌표들의 정보를 나타내는 구조체
 typedef struct _Point {
-    float    x;
-    float    y;
+    float    x = 0.0;
+    float    y = 0.0;
 } Point;
 
 /// 색상(RGBC)의 정보를 나타내는 구조체
@@ -427,12 +427,24 @@ void CollisionDetectionToSlidingBar() {
 void CollisionDetectionToRectangleBlock() {
     for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
         if(rectangleBlock[i].state) {
-            // y 조건1 : 아래에서 공이 들어온 경우 | 공이 벽돌에 다였거나, 공이 벽돌 안에 있는 경우
+            // 공이 벽돌과 충돌을 확인
             if(ballPosition.y + ballRadius >= rectangleBlock[i].leftBottom.y && ballPosition.y - ballRadius <= rectangleBlock[i].leftTop.y) {
                 if(ballPosition.x + ballRadius >= rectangleBlock[i].leftBottom.x && ballPosition.x - ballRadius <= rectangleBlock[i].rightBottom.x){
-                    ballSpeed.y *= -1;
+//                    ballSpeed.y *= -1;
                     rectangleBlock[i].state --;
-                    break;
+//                    break;
+                    
+                    Point _block;
+                    _block.x = rectangleBlock[i].leftBottom.x + rectangleBlockLen / 2;
+                    _block.y = rectangleBlock[i].leftBottom.y + rectangleBlockWeight / 2;
+                    float inc = inclination(ballPosition, _block);
+                    
+                    if(inc < 0.5 && inc > -0.5) {
+                        ballSpeed.x *= -1;
+                    }
+                    else {
+                        ballSpeed.y *= -1;
+                    }
                 }
             }
         }
