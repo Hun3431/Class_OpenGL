@@ -6,18 +6,23 @@
 #define    PI               M_PI
 #define    WIDTH            1000
 #define    HEIGHT           1000
+
 #define    STATE_BREAK      0
 #define    STATE_ONE        1
 #define    STATE_TWO        2
-#define    STATE_THREE        3
+#define    STATE_THREE      3
+
 #define    MODE_DEFAULT     0
+
 #define    RECTANGLE_BLOCK_NUM 19
 #define    WALL_NUM         9
-#define    READY            0
-#define    RUN              1
+#define    FIRENUM          1000
+
+#define    GAMEREADY        0
+#define    GAMERUN          1
 #define    GAMEOVER         2
 #define    GAMECLEAR        3
-#define    FIRENUM          1000
+
 /*
  *  구조체 선언부
  */
@@ -218,6 +223,7 @@ int rectangleBlockWeight = 50;
 
 bool pause = true;
 int  mode  = GAMECLEAR;
+bool start = false;
 
 const int star_num = 100;
 Space star[star_num];
@@ -1290,28 +1296,33 @@ void ShowCLEAR() {
 void MySpecialKey(int key, int x, int y) {
     switch (key) {
         case GLUT_KEY_LEFT:
-            if(pause) {
+            if(!start) {
+                
+            }
+            else if(pause) {
                 slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
             }
-            
             break;
         case GLUT_KEY_RIGHT:
-            if(pause) {
+            if(!start) {
+                
+            }
+            else if(pause) {
                 slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
             }
             break;
         // 슬라이딩바를 움직여 공의 속도 상승
         case 32:
             switch (mode) {
-                case READY:
+                case GAMEREADY:
                     if (arrownum) {
                         exit(0);
                     }
                     else {
-                        mode = RUN;
+                        mode = GAMERUN;
                     }
                     break;
-                case RUN:
+                case GAMERUN:
                     if (powerHitGauge > 30){
                         powerHitCheck = true;
                         powerHitVariation = powerHitGauge / 20;
@@ -1327,10 +1338,24 @@ void MySpecialKey(int key, int x, int y) {
             break;
             
         case GLUT_KEY_UP:
-            arrownum = arrownum ? 0 : 1;
+            switch (mode) {
+                case GAMEREADY:
+                    arrownum = arrownum ? 0 : 1;
+                    break;
+                case GAMERUN:
+                    
+                    break;
+            }
             break;
         case GLUT_KEY_DOWN:
-            arrownum = arrownum ? 0 : 1;
+            switch (mode) {
+                case GAMEREADY:
+                    arrownum = arrownum ? 0 : 1;
+                    break;
+                case GAMERUN:
+                    
+                    break;
+            }
             break;
         
         default:
@@ -1352,10 +1377,10 @@ void RenderScene(void) {
     glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
     glClear(GL_COLOR_BUFFER_BIT);
     
-    if(mode == READY) {
+    if(mode == GAMEREADY) {
         ShowREADY();
     }
-    else if(mode == RUN){
+    else if(mode == GAMERUN){
         // 충돌 검증
         CollisionDetectionToWindow();
         CollisionDetectionToCorner();
