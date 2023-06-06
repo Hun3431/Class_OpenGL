@@ -16,8 +16,8 @@
 #define    READY            0
 #define    RUN              1
 #define    GAMEOVER         2
-#define    GAMECLEAR            3
-
+#define    GAMECLEAR        3
+#define    FIRENUM          1000
 /*
  *  구조체 선언부
  */
@@ -98,6 +98,74 @@ struct Space {
     Color c;
 };
 
+class FireCracker {
+private:
+    int delay;
+    int time = 0;
+    int num;
+    int len;
+    float delta;
+    float radius = 0;
+    float x;    // x좌표(고정)
+    float y;    // y좌표(0 ~ 최대)
+    float maxY; // y좌표(최대)
+    float maxRadius;
+    float changeY;
+    Color color;
+    
+public:
+    /// FireCracker 생성자
+    /// 고정 x좌표
+    /// 최대 y좌표
+    /// y좌표 변화량
+    /// 폭죽 반지름
+    /// 색상
+    FireCracker(float _x, float _maxY, float _changeY, float _radius, Color _color, int _num, int _delay, int _len) {
+        x = _x;
+        maxY = _maxY;
+        changeY = _changeY;
+        maxRadius = _radius;
+        color = _color;
+        num = _num;
+        delay = _delay;
+        len = _len;
+    }
+    
+    void Fire() {
+        if(time > delay) {
+            glColor3f(color.red, color.green, color.blue);
+            glPointSize(2);
+            
+            if(maxY > y) {
+                y += changeY;
+                glBegin(GL_POINTS);
+                for(int i = 0; i < len; i ++) {
+                    glVertex2f(x, y - i * 10);
+                }
+                glEnd();
+            }
+            if(maxY <= y) {
+                if(maxRadius > radius){
+                    glBegin(GL_POINTS);
+                    glVertex2f(x, y);
+                    glEnd();
+                    for(int i = 0; i < radius; i += 10) {
+                        delta = 2 * PI / num;
+                        glBegin(GL_POINTS);
+                        for(int j = 0; j < num; j ++) {
+                            glVertex2f(x + (i + 10) * cos(delta * j), y + (i + 10) * sin(delta * j));
+                        }
+                        glEnd();
+                    }
+                    radius += 0.5;
+                }
+            }
+        }
+        time ++;
+    }
+};
+
+
 /*
  *  변수 선언부
  */
@@ -157,6 +225,9 @@ Space star[star_num];
 int arrownum = 0;
 
 int gameoverColor = 0;
+
+FireCracker * fire[FIRENUM];
+
 
 /*
  *  Shape Color
@@ -458,7 +529,28 @@ void InitSpace() {
     }
 }
 
-
+void InitClear() {
+    for(int i = 0; i < FIRENUM; i ++) {
+        float x = rand() % 1000;
+        float y = rand() % 500 + 400;
+        float change = (rand() % 100) / 10.0 + 0.5;
+        float radius = rand() % 50 + 100;
+        float red = (rand() % 50 + 50) / 100.0;
+        float green = (rand() % 50 + 50) / 100.0;
+        float blue = (rand() % 50 + 50) / 100.0;
+        Color color = { red, green, blue };
+        int num = rand() % 30 + 20;
+        int d = rand() % 10000;
+        int len = rand() % 5 + 2;
+        
+        std::cout << i << " ";
+        std::cout << x << " ";
+        std::cout << y << " ";
+        std::cout << change << " ";
+        std::cout << radius << std::endl;
+        fire[i] = new FireCracker(x, y, change, radius, color, num, d, len);
+    }
+}
 
 /*
  *  Create Function
@@ -1186,6 +1278,9 @@ void ShowGAMEOVER() {
 void ShowCLEAR() {
     DrawGAME();
     DrawCLEAR();
+    for(int i = 0; i < FIRENUM; i ++) {
+        fire[i] -> Fire();
+    }
 }
 
 /*
@@ -1197,8 +1292,8 @@ void MySpecialKey(int key, int x, int y) {
         case GLUT_KEY_LEFT:
             if(pause) {
                 slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
-                
             }
+            
             break;
         case GLUT_KEY_RIGHT:
             if(pause) {
@@ -1307,6 +1402,7 @@ void RenderScene(void) {
 int main(int argc, char** argv) {
     InitSpace();
     InitWall();
+    InitClear();
     glutInit(&argc, argv);
     CreateRectangleBlock();
     glutInitWindowPosition(0, 0);
