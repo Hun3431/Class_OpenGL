@@ -1218,6 +1218,37 @@ void GaugeBar() {
     glEnd();
 }
 
+void Heart() {
+    glColor3f(softRed.red, softRed.green, softRed.blue);
+    glBegin(GL_POLYGON);
+    double r = 0, t = 0;
+    double x = 0, y = 0;
+    
+    while(t < 6.28)
+    {
+        if(t > 3.14) r = sqrt(9.0 / (17.0 + 8 * sin(2.0 * t)));
+        else   r = sqrt(9.0 / (17.0 - 8 * sin(2.0 * t)));
+        
+        x = r * sin(t);
+        y = r * cos(t);
+        
+        glVertex2f((x * 50) + 500, (y * 50) + 200);
+        
+        t += 0.1;
+    }
+    glEnd();
+}
+
+void ShowLife() {
+    for(int i = 0; i < life; i ++) {
+        glPushMatrix();
+        glTranslatef(425, -125 + 100 * i, 0);
+        Heart();
+        glPopMatrix();
+    }
+}
+
+
 /*
  *  Draw Bitmap
  */
@@ -1508,6 +1539,7 @@ void RenderScene(void) {
         ShowRectangleBlock();
 
         GaugeBar();
+        ShowLife();
         
         if(CountBlock() && pause && start) {
             // 공의 위치 결정
