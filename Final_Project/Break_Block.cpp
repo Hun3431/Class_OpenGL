@@ -16,7 +16,7 @@
 #define    READY            0
 #define    RUN              1
 #define    GAMEOVER         2
-#define    CLEAR            3
+#define    GAMECLEAR            3
 
 /*
  *  구조체 선언부
@@ -149,7 +149,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = GAMEOVER;
+int  mode  = GAMECLEAR;
 
 const int star_num = 100;
 Space star[star_num];
@@ -177,7 +177,8 @@ Color ColorList[] = {
     { 0.5, 0.8, 0.9 },
     { 0.3, 0.4, 0.9 },
     { 0.6, 0.4, 0.95 },
-    { 0.9, 0.9, 0.8 }
+    { 0.9, 0.9, 0.8 },
+    { 0.4, 0.4, 0.4 }
 };
 
 /*
@@ -376,6 +377,49 @@ bool OVER[4][5][5] = {
         { 1, 0, 1, 1, 1 },
         { 1, 0, 0, 0, 0 },
         { 0, 1, 1, 1, 1 }
+    },
+    /// R
+    {
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 0 },
+        { 1, 0, 1, 0, 0 },
+        { 1, 0, 0, 1, 1 }
+    }
+};
+
+bool CLEAR[5][5][5] = {
+    /// C
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1 }
+    },
+    /// L
+    {
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 1, 1, 1, 1 }
+    },
+    /// E
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1 }
+    },
+    /// A
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 }
     },
     /// R
     {
@@ -1005,8 +1049,9 @@ void DrawGAME() {
     for(int index = 0; index < 4; index ++) {
         if(mode == GAMEOVER){
             glColor3f(ColorList[(index + gameoverColor / 10) % 8].red, ColorList[(index + gameoverColor / 10) % 8].green, ColorList[(index + gameoverColor / 10) % 8].blue);
-//            if(gameoverColor / 10 == index) glColor3f(softRed.red, softRed.green, softRed.blue);
-//            else glColor3f(ballColor.red, ballColor.green, ballColor.blue);
+        }
+        else if(mode == GAMECLEAR) {
+            glColor3f(ColorList[index].red, ColorList[index].green, ColorList[index].blue);
         }
         for(int y = 0; y < 5; y ++) {
             for(int x = 0; x < 5; x ++) {
@@ -1100,6 +1145,21 @@ void DrawOVER() {
 
 }
 
+/// CLEAR Bitmap 출력 함수
+void DrawCLEAR() {
+    int size = 25;
+    for(int index = 0; index < 5; index ++) {
+        glColor3f(ColorList[index + 4].red, ColorList[index + 4].green, ColorList[index + 4].blue);
+        for(int y = 0; y < 5; y ++) {
+            for(int x = 0; x < 5; x ++) {
+                if(CLEAR[index][y][x]) {
+                    DrawRectangle(x * size + 137 + index * (size * 6), (4 - y) * size + 400, size);
+                }
+            }
+        }
+    }
+}
+
 
 /*
  *  GAMEMODE PAGE
@@ -1123,6 +1183,10 @@ void ShowGAMEOVER() {
     DrawOVER();
 }
 
+void ShowCLEAR() {
+    DrawGAME();
+    DrawCLEAR();
+}
 
 /*
  *  Event Callback Function
@@ -1232,8 +1296,8 @@ void RenderScene(void) {
         ShowGAMEOVER();
         gameoverColor = gameoverColor == 0 ? 80 : gameoverColor - 1;
     }
-    else if(mode == CLEAR) {
-        
+    else if(mode == GAMECLEAR) {
+        ShowCLEAR();
     }
     glutSwapBuffers();
     glFlush();
