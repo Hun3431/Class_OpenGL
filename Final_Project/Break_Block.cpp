@@ -294,6 +294,49 @@ bool ARROW[5][5] = {
 };
 
 
+bool PAUSE[5][5][5] = {
+    /// P
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 }
+    },
+    /// A
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 }
+    },
+    /// U
+    {
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 }
+    },
+    /// S
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 0 },
+        { 0, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 0 }
+    },
+    /// E
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1 }
+    }
+};
+
 /*
  *  Initial Function
  */
@@ -887,6 +930,9 @@ void DrawSpace() {
     }
 }
 
+/*
+ *  Draw Bitmap
+ */
 void DrawRectangle(int x, int y, int w) {
     glBegin(GL_POLYGON);
     glVertex2f(x, y);
@@ -956,6 +1002,19 @@ void DrawARROW() {
     }
 }
 
+void DrawPAUSE() {
+    int size = 20;
+    for(int index = 0; index < 5; index ++) {
+        for(int y = 0; y < 5; y ++) {
+            for(int x = 0; x < 5; x ++) {
+                if(PAUSE[index][y][x]) {
+                    DrawRectangle(x * size + 210 + index * (size * 6), (4 - y) * size + 400, size);
+                }
+            }
+        }
+    }
+}
+
 
 /*
  *  GAMEMODE PAGE
@@ -982,10 +1041,15 @@ void ShowREADY(){
 void MySpecialKey(int key, int x, int y) {
     switch (key) {
         case GLUT_KEY_LEFT:
-            slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
+            if(pause) {
+                slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
+                
+            }
             break;
         case GLUT_KEY_RIGHT:
-            slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
+            if(pause) {
+                slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
+            }
             break;
         // 슬라이딩바를 움직여 공의 속도 상승
         case 32:
@@ -1075,6 +1139,11 @@ void RenderScene(void) {
             ballPosition.y += ballSpeed.y;
         }
 
+        if(!pause) {
+            glColor3f(1.0f, 1.0f, 1.0f);
+            DrawPAUSE();
+        }
+        
         glutSwapBuffers();
         glFlush();
     }
