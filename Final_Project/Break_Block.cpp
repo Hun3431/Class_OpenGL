@@ -164,6 +164,47 @@ Color ballColor = { 0.97, 0.95, 0.99 };
 
 
 /*
+ *  Bitmap Setting
+ */
+/// READ Bitmap
+bool READ[4][5][5] = {
+    /// R
+    {
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 0 },
+        { 1, 0, 1, 0, 0 },
+        { 1, 0, 0, 1, 1 }
+    },
+    /// E
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1 }
+    },
+    /// A
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 }
+    },
+    /// D
+    {
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 0 }
+    }
+};
+
+
+
+/*
  *  Initial Function
  */
 ///
@@ -756,12 +797,36 @@ void DrawSpace() {
     }
 }
 
+void DrawRectangle(int x, int y, int w) {
+    glBegin(GL_POLYGON);
+    glVertex2f(x, y);
+    glVertex2f(x + 32, y);
+    glVertex2f(x + 32, y + 32);
+    glVertex2f(x, y + 32);
+    glEnd();
+}
+
+void DrawREADY() {
+    int size = 32;
+    glColor3f(1.0f, 1.0f, 1.0f);
+    for(int index = 0; index < 4; index ++) {
+        for(int y = 0; y < 5; y ++) {
+            for(int x = 0; x < 5; x ++) {
+                if(READ[index][y][x]) {
+                    DrawRectangle(x * size + 132 + index * 192, (4 - y) * size + 700, size);
+                }
+            }
+        }
+    }
+}
+
 
 /*
  *  GAMEMODE PAGE
  */
 void ShowREADY(){
     DrawSpace();
+    DrawREADY();
 }
 
 
