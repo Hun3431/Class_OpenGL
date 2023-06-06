@@ -224,7 +224,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = GAMEREADY;
+int  mode  = GAMECLEAR;
 bool start = false;
 
 const int star_num = 100;
@@ -235,15 +235,15 @@ int arrownum = 0;
 int gameoverColor = 0;
 
 FireCracker * fire[FIRENUM];
-
+CopyBall * copyball[10];
+int copycount = 0;
 
 /*
  *  Shape Color
  */
 Color backGroundColor = { 0.1, 0.1, 0.1 };
-Color wallColor = { 0.9, 0.8, 0.5 };
-Color slidingBarColor = { 0.6, 0.8, 0.95 };
-Color ballColor = { 0.97, 0.95, 0.99 };
+Color softYellow = { 0.9, 0.8, 0.5 };
+Color softWhite = { 0.97, 0.95, 0.99 };
 Color softRed = { 0.99, 0.4, 0.4 };
 Color softGreen = { 0.5, 0.8, 0.7 };
 Color softBlue = { 0.6, 0.8, 0.95 };
@@ -1278,12 +1278,12 @@ void DrawCLEAR() {
  */
 void ShowREADY(){
     DrawSpace();
-    glColor3f(wallColor.red,wallColor.green,wallColor.blue);
+    glColor3f(softYellow.red,softYellow.green,softYellow.blue);
     DrawGAME();
-    if(arrownum) glColor3f(ballColor.red, ballColor.green, ballColor.blue);
+    if(arrownum) glColor3f(softWhite.red, softWhite.green, softWhite.blue);
     else glColor3f(softGreen.red, softGreen.green, softGreen.blue);
     DrawSTART();
-    if(!arrownum) glColor3f(ballColor.red, ballColor.green, ballColor.blue);
+    if(!arrownum) glColor3f(softWhite.red, softWhite.green, softWhite.blue);
     else glColor3f(softGreen.red, softGreen.green, softGreen.blue);
     DrawEXIT();
     glColor3f(softRed.red, softRed.green, softRed.blue);
@@ -1296,11 +1296,11 @@ void ShowGAMEOVER() {
 }
 
 void ShowCLEAR() {
-    DrawGAME();
-    DrawCLEAR();
     for(int i = 0; i < FIRENUM; i ++) {
         fire[i] -> Fire();
     }
+    DrawGAME();
+    DrawCLEAR();
 }
 
 /*
@@ -1410,15 +1410,15 @@ void RenderScene(void) {
         CollisionDetectionToRectangleBlock();
         
         // 요소 출력
-        glColor3f(ballColor.red, ballColor.green, ballColor.blue);
+        glColor3f(softWhite.red, softWhite.green, softWhite.blue);
         if(start) ShowBall();
         
         if(!start) ShowArrow();
         
-        glColor3f(slidingBarColor.red, slidingBarColor.green, slidingBarColor.blue);
+        glColor3f(softBlue.red, softBlue.green, softBlue.blue);
         ShowSlidingBar();
 
-        glColor3f(wallColor.red, wallColor.green, wallColor.blue);
+        glColor3f(softYellow.red, softYellow.green, softYellow.blue);
         ShowWall();
 
         ShowRectangleBlock();
