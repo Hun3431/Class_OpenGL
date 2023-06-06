@@ -917,23 +917,24 @@ void ShowRectangleBlock() {
 /*
  *  내부 화면들
  */
-///
-void Draw_Circle(float x, float y, float c_radius) {
+/// 원을 그려주는 함수
+void DrawCircle(float x, float y, float c_radius) {
    float    delta;
    int      num = 36;
 
    delta = 2 * PI / num;
    glBegin(GL_POLYGON);
    for (int i = 0; i < num; i++)
-      glVertex2f(x + c_radius*cos(delta*i), y + c_radius*sin(delta*i));
+      glVertex2f(x + c_radius * cos(delta * i), y + c_radius * sin(delta * i));
    glEnd();
 }
 
+/// 우주 배경을 출력하는 함수
 void DrawSpace() {
     glBegin(GL_POLYGON);
     for(int i = 0; i < star_num; i ++) {
         glColor3f(star[i].c.red, star[i].c.green, star[i].c.blue);
-        Draw_Circle(star[i].x, star[i].y,rand()%3);
+        DrawCircle(star[i].x, star[i].y, rand() % 3);
     }
 }
 
@@ -949,7 +950,8 @@ void DrawRectangle(int x, int y, int w) {
     glEnd();
 }
 
-void DrawREADY() {
+/// GAME Bitmap 출력 함수
+void DrawGAME() {
     int size = 32;
     for(int index = 0; index < 4; index ++) {
         for(int y = 0; y < 5; y ++) {
@@ -962,6 +964,7 @@ void DrawREADY() {
     }
 }
 
+/// START Bitmap 출력 함수
 void DrawSTART() {
     int size = 15;
     for(int index = 0; index < 5; index ++) {
@@ -975,6 +978,7 @@ void DrawSTART() {
     }
 }
 
+/// EXIT Bitmap 출력 함수
 void DrawEXIT() {
     int size = 15;
     for(int index = 0; index < 4; index ++) {
@@ -998,6 +1002,7 @@ void DrawEXIT() {
     }
 }
 
+/// ARROW Bitmap 출력 함수
 void DrawARROW() {
     int size = 15;
     for(int y = 0; y < 5; y ++) {
@@ -1009,6 +1014,7 @@ void DrawARROW() {
     }
 }
 
+/// PAUSE Bitmap 출력 함수
 void DrawPAUSE() {
     int size = 20;
     for(int index = 0; index < 5; index ++) {
@@ -1029,7 +1035,7 @@ void DrawPAUSE() {
 void ShowREADY(){
     DrawSpace();
     glColor3f(wallColor.red,wallColor.green,wallColor.blue);
-    DrawREADY();
+    DrawGAME();
     if(arrownum) glColor3f(ballColor.red, ballColor.green, ballColor.blue);
     else glColor3f(softGreen.red, softGreen.green, softGreen.blue);
     DrawSTART();
