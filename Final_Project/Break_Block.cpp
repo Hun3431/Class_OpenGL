@@ -246,6 +246,40 @@ bool START[5][5][5] = {
     }
 };
 
+bool EXIT[4][5][5] {
+    /// E
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1 }
+    },
+    /// X
+    {
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 }
+    },
+    /// I
+    {
+        { 1, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 }
+    },
+    /// T
+    {
+        { 1, 0, 0, 0, 0 },
+        { 1, 1, 1, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 0 }
+    }
+};
 
 
 /*
@@ -878,6 +912,29 @@ void DrawSTART() {
     }
 }
 
+void DrawEXIT() {
+    int size = 15;
+    glColor3f(1.0f, 1.0f, 1.0f);
+    for(int index = 0; index < 4; index ++) {
+        if (index == 3) {
+            for(int y = 0; y < 5; y ++) {
+                for(int x = 0; x < 5; x ++) {
+                    if(EXIT[index][y][x]) {
+                        DrawRectangle(x * size + 350 + index * (size * 6) - (size * 4), (4 - y) * size + 300, size);
+                    }
+                }
+            }
+            break;
+        }
+        for(int y = 0; y < 5; y ++) {
+            for(int x = 0; x < 5; x ++) {
+                if(EXIT[index][y][x]) {
+                    DrawRectangle(x * size + 350 + index * (size * 6), (4 - y) * size + 300, size);
+                }
+            }
+        }
+    }
+}
 
 /*
  *  GAMEMODE PAGE
@@ -886,6 +943,7 @@ void ShowREADY(){
     DrawSpace();
     DrawREADY();
     DrawSTART();
+    DrawEXIT();
 }
 
 
