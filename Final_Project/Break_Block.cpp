@@ -149,12 +149,14 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = READY;
+int  mode  = GAMEOVER;
 
 const int star_num = 100;
 Space star[star_num];
 
 int arrownum = 0;
+
+int gameoverColor = 0;
 
 /*
  *  Shape Color
@@ -166,6 +168,17 @@ Color ballColor = { 0.97, 0.95, 0.99 };
 Color softRed = { 0.99, 0.4, 0.4 };
 Color softGreen = { 0.5, 0.8, 0.7 };
 Color softBlue = { 0.6, 0.8, 0.95 };
+
+Color ColorList[] = {
+    { 0.99, 0.4, 0.4 },
+    { 0.94, 0.6, 0.45 },
+    { 0.9, 0.8, 0.5 },
+    { 0.5, 0.8, 0.7 },
+    { 0.5, 0.8, 0.9 },
+    { 0.3, 0.4, 0.9 },
+    { 0.6, 0.4, 0.95 },
+    { 0.9, 0.9, 0.8 }
+};
 
 /*
  *  Bitmap Setting
@@ -338,6 +351,42 @@ bool PAUSE[5][5][5] = {
         { 0, 1, 1, 1, 1 }
     }
 };
+
+bool OVER[4][5][5] = {
+    /// O
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 }
+    },
+    /// V
+    {
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 0, 1, 0 },
+        { 0, 0, 1, 0, 0 }
+    },
+    /// E
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1 }
+    },
+    /// R
+    {
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 0 },
+        { 1, 0, 1, 0, 0 },
+        { 1, 0, 0, 1, 1 }
+    }
+};
+
 
 /*
  *  Initial Function
@@ -954,6 +1003,11 @@ void DrawRectangle(int x, int y, int w) {
 void DrawGAME() {
     int size = 32;
     for(int index = 0; index < 4; index ++) {
+        if(mode == GAMEOVER){
+            glColor3f(ColorList[(index + gameoverColor / 10) % 8].red, ColorList[(index + gameoverColor / 10) % 8].green, ColorList[(index + gameoverColor / 10) % 8].blue);
+//            if(gameoverColor / 10 == index) glColor3f(softRed.red, softRed.green, softRed.blue);
+//            else glColor3f(ballColor.red, ballColor.green, ballColor.blue);
+        }
         for(int y = 0; y < 5; y ++) {
             for(int x = 0; x < 5; x ++) {
                 if(READ[index][y][x]) {
@@ -1028,6 +1082,24 @@ void DrawPAUSE() {
     }
 }
 
+/// OVER Bitmap 출력 함수
+void DrawOVER() {
+    int size = 32;
+    for(int index = 0; index < 4; index ++) {
+        if(mode == GAMEOVER){
+            glColor3f(ColorList[(index + 4 + gameoverColor / 10) % 8].red, ColorList[(index + 4 + gameoverColor / 10) % 8].green, ColorList[(index + 4 + gameoverColor / 10) % 8].blue);
+        }
+        for(int y = 0; y < 5; y ++) {
+            for(int x = 0; x < 5; x ++) {
+                if(OVER[index][y][x]) {
+                    DrawRectangle(x * size + 132 + index * (size * 6), (4 - y) * size + 300, size);
+                }
+            }
+        }
+    }
+
+}
+
 
 /*
  *  GAMEMODE PAGE
@@ -1044,6 +1116,11 @@ void ShowREADY(){
     DrawEXIT();
     glColor3f(softRed.red, softRed.green, softRed.blue);
     DrawARROW();
+}
+
+void ShowGAMEOVER() {
+    DrawGAME();
+    DrawOVER();
 }
 
 
@@ -1113,19 +1190,13 @@ void MyReshape(int w, int h) {
 
 /// Window 화면을 출력할 때 실행되는 콜백함수
 void RenderScene(void) {
+    glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
     if(mode == READY) {
-        glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
-        glClear(GL_COLOR_BUFFER_BIT);
-        
         ShowREADY();
-        
-        glutSwapBuffers();
-        glFlush();
     }
     else if(mode == RUN){
-        glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
-        glClear(GL_COLOR_BUFFER_BIT);
-
         // 충돌 검증
         CollisionDetectionToWindow();
         CollisionDetectionToCorner();
@@ -1156,16 +1227,16 @@ void RenderScene(void) {
             glColor3f(1.0f, 1.0f, 1.0f);
             DrawPAUSE();
         }
-        
-        glutSwapBuffers();
-        glFlush();
     }
     else if(mode == GAMEOVER) {
-        
+        ShowGAMEOVER();
+        gameoverColor = gameoverColor == 0 ? 80 : gameoverColor - 1;
     }
     else if(mode == CLEAR) {
         
     }
+    glutSwapBuffers();
+    glFlush();
 }
 
 
