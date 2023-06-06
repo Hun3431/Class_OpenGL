@@ -476,13 +476,43 @@ void CollisionDetectionToWall(void){
 
 /// 슬라이딩바와 충돌을 확인하는 함수
 void CollisionDetectionToSlidingBar() {
-    if(ballPosition.y - ballRadius < slidingBar.center.y + slidingBar.weight) {
-        if(ballPosition.x < slidingBar.center.x + slidingBarLen / 2 && ballPosition.x > slidingBar.center.x - slidingBarLen / 2){
-            if(powerHitCheck) {
-                powerShut = true;
+    if (beforeTouch != RECTANGLE_BLOCK_NUM + WALL_NUM + 1) {
+        float distance = pow(ballPosition.x - (slidingBar.center.x - slidingBarLen / 2), 2) + pow(ballPosition.y - (slidingBar.center.y + slidingBarWeight), 2);
+        if(distance <= ballRadius * ballRadius) {
+            std::cout << "슬라이딩 바 좌측 상단 충돌" << std::endl;
+            Vector v = { -1.0, 1.0 };
+            float vSum = sqrt(v.x * v.x + v.y * v.y);
+            
+            ballSpeed.x = v.x * (speedSum / vSum / 2);
+            ballSpeed.y = v.y * (speedSum / vSum / 2);
+            
+            beforeTouch = RECTANGLE_BLOCK_NUM + WALL_NUM + 1;
+            
+            return;
+        }
+        
+        distance = pow(ballPosition.x - (slidingBar.center.x + slidingBarLen / 2), 2) + pow(ballPosition.y - (slidingBar.center.y + slidingBarWeight), 2);
+        if(distance <= ballRadius * ballRadius) {
+            std::cout << "슬라이딩 바 우측 상단 충돌" << std::endl;
+            Vector v = { 1.0, 1.0 };
+            float vSum = sqrt(v.x * v.x + v.y * v.y);
+            
+            ballSpeed.x = v.x * (speedSum / vSum / 2);
+            ballSpeed.y = v.y * (speedSum / vSum / 2);
+            
+            beforeTouch = RECTANGLE_BLOCK_NUM + WALL_NUM + 1;
+            
+            return;
+        }
+        
+        if(ballPosition.y - ballRadius < slidingBar.center.y + slidingBar.weight) {
+            if(ballPosition.x < slidingBar.center.x + slidingBarLen / 2 && ballPosition.x > slidingBar.center.x - slidingBarLen / 2){
+                if(powerHitCheck) {
+                    powerShut = true;
+                }
+                ballSpeed.y *= -1;
+                beforeTouch = RECTANGLE_BLOCK_NUM + WALL_NUM + 1;
             }
-            ballSpeed.y *= -1;
-            //std::cout << "Detection" << std::endl;
         }
     }
 }
