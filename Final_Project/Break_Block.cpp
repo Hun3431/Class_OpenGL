@@ -242,6 +242,15 @@ void ChangeSpeed(float change) {
     speedSum = sqrt(speedX * speedX + speedY * speedY);
 }
 
+/// 두 선분의 교점을 구하는 함수
+Point MeetPoint(Point a1, Point a2, Point b1, Point b2) {
+    float x = ((a1.x * a2.y - a1.y * a2.x) * (b1.x - b2.x) - (a1.x - a2.x) * (b1.x * b2.y - b1.y * b2.x)) / ((a1.x - a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x - b2.x));
+    float y = ((a1.x * a2.y - a1.y * a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x * b2.y - b1.y * b2.x)) / ((a1.x - a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x - b2.x));
+    Point p = { x, y };
+    
+    return p;
+}
+
 
 /*
  *  SpecialMode Function
