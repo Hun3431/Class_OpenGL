@@ -162,7 +162,8 @@ Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
 Color slidingBarColor = { 0.6, 0.8, 0.95 };
 Color ballColor = { 0.97, 0.95, 0.99 };
-
+Color softRed = { 0.99, 0.4, 0.4 };
+Color softGreen = { 0.5, 0.8, 0.7 };
 
 /*
  *  Bitmap Setting
@@ -897,12 +898,11 @@ void DrawRectangle(int x, int y, int w) {
 
 void DrawREADY() {
     int size = 32;
-    glColor3f(1.0f, 1.0f, 1.0f);
     for(int index = 0; index < 4; index ++) {
         for(int y = 0; y < 5; y ++) {
             for(int x = 0; x < 5; x ++) {
                 if(READ[index][y][x]) {
-                    DrawRectangle(x * size + 132 + index * (size * 6), (4 - y) * size + 700, size);
+                    DrawRectangle(x * size + 132 + index * (size * 6), (4 - y) * size + 600, size);
                 }
             }
         }
@@ -911,12 +911,11 @@ void DrawREADY() {
 
 void DrawSTART() {
     int size = 15;
-    glColor3f(1.0f, 1.0f, 1.0f);
     for(int index = 0; index < 5; index ++) {
         for(int y = 0; y < 5; y ++) {
             for(int x = 0; x < 5; x ++) {
                 if(START[index][y][x]) {
-                    DrawRectangle(x * size + 350 + index * (size * 6), (4 - y) * size + 450, size);
+                    DrawRectangle(x * size + 350 + index * (size * 6), (4 - y) * size + 400, size);
                 }
             }
         }
@@ -925,13 +924,12 @@ void DrawSTART() {
 
 void DrawEXIT() {
     int size = 15;
-    glColor3f(1.0f, 1.0f, 1.0f);
     for(int index = 0; index < 4; index ++) {
         if (index == 3) {
             for(int y = 0; y < 5; y ++) {
                 for(int x = 0; x < 5; x ++) {
                     if(EXIT[index][y][x]) {
-                        DrawRectangle(x * size + 350 + index * (size * 6) - (size * 4), (4 - y) * size + 300, size);
+                        DrawRectangle(x * size + 350 + index * (size * 6) - (size * 4), (4 - y) * size + 250, size);
                     }
                 }
             }
@@ -940,7 +938,7 @@ void DrawEXIT() {
         for(int y = 0; y < 5; y ++) {
             for(int x = 0; x < 5; x ++) {
                 if(EXIT[index][y][x]) {
-                    DrawRectangle(x * size + 350 + index * (size * 6), (4 - y) * size + 300, size);
+                    DrawRectangle(x * size + 350 + index * (size * 6), (4 - y) * size + 250, size);
                 }
             }
         }
@@ -949,24 +947,30 @@ void DrawEXIT() {
 
 void DrawARROW() {
     int size = 15;
-    glColor3f(1.0f, 1.0f, 1.0f);
     for(int y = 0; y < 5; y ++) {
         for(int x = 0; x < 5; x ++) {
             if(ARROW[y][x]) {
-                DrawRectangle(x * size + 260, (4 - y) * size + 450 - (150 * arrownum), size);
+                DrawRectangle(x * size + 260, (4 - y) * size + 400 - (150 * arrownum), size);
             }
         }
     }
 }
+
 
 /*
  *  GAMEMODE PAGE
  */
 void ShowREADY(){
     DrawSpace();
+    glColor3f(wallColor.red,wallColor.green,wallColor.blue);
     DrawREADY();
+    if(arrownum) glColor3f(ballColor.red, ballColor.green, ballColor.blue);
+    else glColor3f(softGreen.red, softGreen.green, softGreen.blue);
     DrawSTART();
+    if(!arrownum) glColor3f(ballColor.red, ballColor.green, ballColor.blue);
+    else glColor3f(softGreen.red, softGreen.green, softGreen.blue);
     DrawEXIT();
+    glColor3f(softRed.red, softRed.green, softRed.blue);
     DrawARROW();
 }
 
