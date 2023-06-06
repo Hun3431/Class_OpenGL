@@ -170,7 +170,7 @@ public:
     }
 };
 
-class CopyBall {
+class Ball {
 public:
     bool state = false;
     float ballRadius = 10.0;
@@ -180,23 +180,31 @@ public:
     Vector ballSpeed;
     Color color = { 0.6, 0.6, 0.6 };
     
-    CopyBall(Point _ballPosition, Vector _ballSpeed, float _speedSum, int _beforeTouch) {
+    Ball(Point _ballPosition, Vector _ballSpeed) {
         ballPosition = _ballPosition;
         ballSpeed = _ballSpeed;
-        speedSum = _speedSum;
+        speedSum = sqrt(ballSpeed.x * ballSpeed.x + ballSpeed.y * ballSpeed.y);
+        state = true;
     }
     
-    void show() {
+    void Show() {
         if (state) {
             int num = 36;
             float delta = 2 * PI / num;
+            glColor3f(color.red, color.green, color.blue);
             glBegin(GL_POLYGON);
             for(int i = 0; i < num; i ++) {
-                glVertex2f(this->ballPosition.x + this->ballRadius * cos(delta * i), this->ballPosition.y + this->ballRadius * sin(delta * i));
+                glVertex2f(ballPosition.x + ballRadius * cos(delta * i), ballPosition.y + ballRadius * sin(delta * i));
             }
             glEnd();
         }
     }
+    
+    void ChangePosition() {
+        ballPosition.x += ballSpeed.x;
+        ballPosition.y += ballSpeed.y;
+    }
+    
 };
 
 /*
@@ -252,7 +260,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = GAMECLEAR;
+int  mode  = GAMERUN;
 bool start = false;
 
 const int star_num = 100;
@@ -263,7 +271,7 @@ int arrownum = 0;
 int gameoverColor = 0;
 
 FireCracker * fire[FIRENUM];
-CopyBall * copyball[10];
+Ball * copyball[100];
 int copycount = 0;
 
 /*
@@ -547,7 +555,6 @@ void InitWall() {
     for(int i = 0; i < WALL_NUM - 1; i ++) {
         Vector v = { Wall[i + 1].x - Wall[i].x, Wall[i + 1].y - Wall[i].y };
         nomalWall[i] = { v.y, -v.x };
-        std::cout << i << ":" << nomalWall[i].x << "|" << nomalWall[i].y << std::endl;
     }
 }
 
@@ -635,7 +642,14 @@ void CreateRectangleBlock() {
 }
 
 void CreateCopyBall() {
-    //copyball[]
+    float px = rand() % 600 + 200;
+    float py = rand() % 400 + 50;
+    Point position = { px, py };
+    float sx = (rand() % 10 - 5) / 2.0;
+    float sy = (rand() % 10 ) / 2.0;
+    Vector speed = { sx, sy };
+    
+    copyball[copycount ++] = new Ball(position, speed);
 }
 
 
@@ -1375,6 +1389,7 @@ void MySpecialKey(int key, int x, int y) {
                         powerHitCheck = true;
                         powerHitVariation = powerHitGauge / 20;
                     }
+                    CreateCopyBall();
                     break;
                 default:
                     break;
@@ -1436,9 +1451,17 @@ void RenderScene(void) {
         CollisionDetectionToSlidingBar();
         CollisionDetectionToRectangleBlock();
         
+        if(start) {
+            for(int i = 0; i < copycount; i ++) {
+                copyball[i]->Show();
+            }
+        }
+        
         // 요소 출력
         glColor3f(softWhite.red, softWhite.green, softWhite.blue);
-        if(start) ShowBall();
+        if(start) {
+            ShowBall();
+        }
         
         if(!start) ShowArrow();
         
@@ -1455,6 +1478,10 @@ void RenderScene(void) {
             ChangeSpeed(1);
             ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
             ballPosition.y += ballSpeed.y;
+            std::cout << copycount << std::endl;
+            for(int i = 0; i < copycount; i ++) {
+                copyball[i]->ChangePosition();
+            }
         }
         
         if(!CountBlock()) {
