@@ -170,6 +170,34 @@ public:
     }
 };
 
+class CopyBall {
+public:
+    bool state = false;
+    float ballRadius = 10.0;
+    float speedSum;
+    int beforeTouch = -1;
+    Point ballPosition;
+    Vector ballSpeed;
+    Color color = { 0.6, 0.6, 0.6 };
+    
+    CopyBall(Point _ballPosition, Vector _ballSpeed, float _speedSum, int _beforeTouch) {
+        ballPosition = _ballPosition;
+        ballSpeed = _ballSpeed;
+        speedSum = _speedSum;
+    }
+    
+    void show() {
+        if (state) {
+            int num = 36;
+            float delta = 2 * PI / num;
+            glBegin(GL_POLYGON);
+            for(int i = 0; i < num; i ++) {
+                glVertex2f(this->ballPosition.x + this->ballRadius * cos(delta * i), this->ballPosition.y + this->ballRadius * sin(delta * i));
+            }
+            glEnd();
+        }
+    }
+};
 
 /*
  *  변수 선언부
@@ -609,6 +637,10 @@ void CreateRectangleBlock() {
         
         rectangleBlock[i].state = rand() % 3 + 1;
     }
+}
+
+void CreateCopyBall() {
+    //copyball[]
 }
 
 
