@@ -985,9 +985,23 @@ void MySpecialKey(int key, int x, int y) {
             break;
         // 슬라이딩바를 움직여 공의 속도 상승
         case 32:
-            if (powerHitGauge > 30){
-                powerHitCheck = true;
-                powerHitVariation = powerHitGauge / 20;
+            switch (mode) {
+                case READY:
+                    if (arrownum) {
+                        exit(0);
+                    }
+                    else {
+                        mode = RUN;
+                    }
+                    break;
+                case RUN:
+                    if (powerHitGauge > 30){
+                        powerHitCheck = true;
+                        powerHitVariation = powerHitGauge / 20;
+                    }
+                    break;
+                default:
+                    break;
             }
             break;
         // 게임 일시정지
@@ -1067,6 +1081,7 @@ void RenderScene(void) {
         
     }
 }
+
 
 int main(int argc, char** argv) {
     InitSpace();
