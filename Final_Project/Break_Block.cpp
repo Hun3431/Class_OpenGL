@@ -579,11 +579,6 @@ void InitClear() {
         int d = rand() % 10000;
         int len = rand() % 5 + 2;
         
-        std::cout << i << " ";
-        std::cout << x << " ";
-        std::cout << y << " ";
-        std::cout << change << " ";
-        std::cout << radius << std::endl;
         fire[i] = new FireCracker(x, y, change, radius, color, num, d, len);
     }
 }
