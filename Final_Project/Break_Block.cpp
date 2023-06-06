@@ -260,7 +260,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = GAMERUN;
+int  mode  = GAMEREADY;
 bool start = false;
 
 const int star_num = 100;
@@ -274,6 +274,8 @@ FireCracker * fire[FIRENUM];
 Ball * copyball[100];
 int copycount = 0;
 int life = 3;
+int runtime = 0;
+
 
 /*
  *  Shape Color
@@ -545,6 +547,90 @@ bool CLEAR[5][5][5] = {
         { 1, 0, 1, 0, 0 },
         { 1, 0, 0, 1, 1 }
     }
+};
+
+/// Bitmap Number Array
+bool NUMBER[10][5][5] = {
+    /// 0
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 }
+    },
+    /// 1
+    {
+        { 0, 1, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 1, 1, 1, 0 }
+    },
+    /// 2
+    {
+        { 0, 1, 1, 1, 0 },
+        { 0, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1 }
+    },
+    /// 3
+    {
+        { 1, 1, 1, 1, 0 },
+        { 0, 0, 0, 0, 1 },
+        { 0, 0, 1, 1, 0 },
+        { 0, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 0 }
+    },
+    /// 4
+    {
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 1 },
+        { 0, 0, 0, 0, 1 },
+        { 0, 0, 0, 0, 1 }
+    },
+    /// 5
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 1, 1, 1, 0 },
+        { 0, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 }
+    },
+    /// 6
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 }
+    },
+    /// 7
+    {
+        { 1, 1, 1, 1, 0 },
+        { 0, 0, 0, 0, 1 },
+        { 0, 0, 1, 1, 1 },
+        { 0, 0, 0, 0, 1 },
+        { 0, 0, 0, 0, 1 }
+    },
+    /// 8
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 }
+    },
+    /// 9
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 1 },
+        { 0, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 0 }
+    },
 };
 
 
@@ -1218,6 +1304,7 @@ void GaugeBar() {
     glEnd();
 }
 
+/// 하트를 출력하는 함수
 void Heart() {
     glColor3f(softRed.red, softRed.green, softRed.blue);
     glBegin(GL_POLYGON);
@@ -1239,6 +1326,7 @@ void Heart() {
     glEnd();
 }
 
+/// 남은 목숨을 출력하는 함수
 void ShowLife() {
     for(int i = 0; i < life; i ++) {
         glPushMatrix();
@@ -1378,6 +1466,34 @@ void DrawCLEAR() {
     }
 }
 
+/// 소요 시간을 알려주는 함수
+void DrawTimer() {
+    glColor3f(softYellow.red, softYellow.green, softYellow.blue);
+    int size = 10;
+    int time = runtime;
+    int timer[5] = { 0 };
+    
+    timer[0] = time / 10000;
+    time %= 10000;
+    timer[1] = time / 1000;
+    time %= 1000;
+    timer[2] = time / 100;
+    time %= 100;
+    timer[3] = time / 10;
+    timer[4] = time % 10;
+    for(int index = 0; index < 5; index ++) {
+        for(int y = 0; y < 5; y ++) {
+            for(int x = 0; x < 5; x ++) {
+                if(NUMBER[timer[index]][y][x]) {
+                    DrawRectangle(x * size + 650 + index * (size * 6), (4 - y) * size + 900, size);
+                }
+            }
+        }
+    }
+    if(start && pause && mode == GAMERUN) runtime ++;
+}
+
+
 
 /*
  *  GAMEMODE PAGE
@@ -1407,6 +1523,8 @@ void ShowCLEAR() {
     }
     DrawGAME();
     DrawCLEAR();
+    DrawTimer();
+    ShowLife();
 }
 
 /*
@@ -1540,6 +1658,7 @@ void RenderScene(void) {
 
         GaugeBar();
         ShowLife();
+        DrawTimer();
         
         if(CountBlock() && pause && start) {
             // 공의 위치 결정
