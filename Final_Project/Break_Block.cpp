@@ -153,6 +153,7 @@ int  mode  = READY;
 const int star_num = 100;
 Space star[star_num];
 
+int arrownum = 0;
 
 /*
  *  Shape Color
@@ -246,8 +247,9 @@ bool START[5][5][5] = {
     }
 };
 
+/// exit Bitmap
 bool EXIT[4][5][5] {
-    /// E
+    /// e
     {
         { 0, 1, 1, 1, 0 },
         { 1, 0, 0, 0, 1 },
@@ -255,7 +257,7 @@ bool EXIT[4][5][5] {
         { 1, 0, 0, 0, 0 },
         { 0, 1, 1, 1, 1 }
     },
-    /// X
+    /// x
     {
         { 1, 0, 0, 0, 1 },
         { 1, 0, 0, 0, 1 },
@@ -263,7 +265,7 @@ bool EXIT[4][5][5] {
         { 1, 0, 0, 0, 1 },
         { 1, 0, 0, 0, 1 }
     },
-    /// I
+    /// i
     {
         { 1, 0, 0, 0, 0 },
         { 0, 0, 0, 0, 0 },
@@ -271,7 +273,7 @@ bool EXIT[4][5][5] {
         { 1, 0, 0, 0, 0 },
         { 1, 0, 0, 0, 0 }
     },
-    /// T
+    /// t
     {
         { 1, 0, 0, 0, 0 },
         { 1, 1, 1, 0, 0 },
@@ -279,6 +281,15 @@ bool EXIT[4][5][5] {
         { 1, 0, 0, 0, 0 },
         { 0, 1, 1, 1, 0 }
     }
+};
+
+/// 목록을 가리키는 화살표
+bool ARROW[5][5] = {
+    { 1, 0, 0, 0, 0 },
+    { 0, 1, 0, 0, 0 },
+    { 0, 0, 1, 0, 0 },
+    { 0, 1, 0, 0, 0 },
+    { 1, 0, 0, 0, 0 }
 };
 
 
@@ -936,6 +947,18 @@ void DrawEXIT() {
     }
 }
 
+void DrawARROW() {
+    int size = 15;
+    glColor3f(1.0f, 1.0f, 1.0f);
+    for(int y = 0; y < 5; y ++) {
+        for(int x = 0; x < 5; x ++) {
+            if(ARROW[y][x]) {
+                DrawRectangle(x * size + 260, (4 - y) * size + 450 - (150 * arrownum), size);
+            }
+        }
+    }
+}
+
 /*
  *  GAMEMODE PAGE
  */
@@ -944,6 +967,7 @@ void ShowREADY(){
     DrawREADY();
     DrawSTART();
     DrawEXIT();
+    DrawARROW();
 }
 
 
