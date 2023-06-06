@@ -994,6 +994,14 @@ void MySpecialKey(int key, int x, int y) {
         case 27:
             pause = pause ? false : true;
             break;
+            
+        case GLUT_KEY_UP:
+            arrownum = arrownum ? 0 : 1;
+            break;
+        case GLUT_KEY_DOWN:
+            arrownum = arrownum ? 0 : 1;
+            break;
+        
         default:
             break;
     }
