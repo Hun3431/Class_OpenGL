@@ -445,11 +445,8 @@ void CollisionDetectionToRectangleBlock() {
             // 좌측 하단
             float distance = pow(ballPosition.x - rectangleBlock[i].leftBottom.x, 2) + pow(ballPosition.y - rectangleBlock[i].leftBottom.y, 2);
             if(distance <= ballRadius * ballRadius) {
-                Vector b = { -2.0, -1.0 };
-                b.normalize();
-                ballSpeed.normalize();
-                
-                Vector v = ballSpeed.reflect(b);
+                std::cout << "벽돌 좌측 하단 충돌" << std::endl;
+                Vector v = { -1.0, -1.0 };
                 float vSum = sqrt(v.x * v.x + v.y * v.y);
                                     
                 ballSpeed.x = v.x * (speedSum / vSum / 2);
@@ -463,11 +460,8 @@ void CollisionDetectionToRectangleBlock() {
             // 우측 하단
             distance = pow(ballPosition.x - rectangleBlock[i].rightBottom.x, 2) + pow(ballPosition.y - rectangleBlock[i].rightBottom.y, 2);
             if(distance <= ballRadius * ballRadius) {
-                Vector b = { 2.0, -1.0 };
-                b.normalize();
-                ballSpeed.normalize();
-                
-                Vector v = ballSpeed.reflect(b);
+                std::cout << "벽돌 우측 하단 충돌" << std::endl;
+                Vector v = { 1.0, -1.0 };
                 float vSum = sqrt(v.x * v.x + v.y * v.y);
                                     
                 ballSpeed.x = v.x * (speedSum / vSum / 2);
@@ -481,11 +475,8 @@ void CollisionDetectionToRectangleBlock() {
             // 우측 상단
             distance = pow(ballPosition.x - rectangleBlock[i].rightTop.x, 2) + pow(ballPosition.y - rectangleBlock[i].rightTop.y, 2);
             if(distance <= ballRadius * ballRadius) {
-                Vector b = { 2.0, 1.0 };
-                b.normalize();
-                ballSpeed.normalize();
-                
-                Vector v = ballSpeed.reflect(b);
+                std::cout << "벽돌 우측 상단 충돌" << std::endl;
+                Vector v = { 1.0, 1.0 };
                 float vSum = sqrt(v.x * v.x + v.y * v.y);
                                     
                 ballSpeed.x = v.x * (speedSum / vSum / 2);
@@ -499,11 +490,8 @@ void CollisionDetectionToRectangleBlock() {
             // 좌측 상단
             distance = pow(ballPosition.x - rectangleBlock[i].leftTop.x, 2) + pow(ballPosition.y - rectangleBlock[i].leftTop.y, 2);
             if(distance <= ballRadius * ballRadius) {
-                Vector b = { -2.0, 1.0 };
-                b.normalize();
-                ballSpeed.normalize();
-                
-                Vector v = ballSpeed.reflect(b);
+                std::cout << "벽돌 좌측 상단 충돌" << std::endl;
+                Vector v = { -1.0, 1.0 };
                 float vSum = sqrt(v.x * v.x + v.y * v.y);
                                     
                 ballSpeed.x = v.x * (speedSum / vSum / 2);
@@ -679,10 +667,11 @@ void RenderScene(void) {
 
     // 충돌 검증
     CollisionDetectionToWindow();
+    CollisionDetectionToCorner();
     CollisionDetectionToWall();
     CollisionDetectionToSlidingBar();
     CollisionDetectionToRectangleBlock();
-
+    
     if(CountBlock() && pause) {
         // 공의 위치 결정
         ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
