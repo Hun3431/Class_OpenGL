@@ -202,6 +202,50 @@ bool READ[4][5][5] = {
     }
 };
 
+/// START Bitmap
+bool START[5][5][5] = {
+    /// S
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 0 },
+        { 0, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 0 }
+    },
+    /// T
+    {
+        { 1, 1, 1, 1, 1 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 }
+    },
+    /// A
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 }
+    },
+    /// R
+    {
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 0 },
+        { 1, 0, 1, 0, 0 },
+        { 1, 0, 0, 1, 1 }
+    },
+    /// T
+    {
+        { 1, 1, 1, 1, 1 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 }
+    }
+};
+
 
 
 /*
@@ -800,9 +844,9 @@ void DrawSpace() {
 void DrawRectangle(int x, int y, int w) {
     glBegin(GL_POLYGON);
     glVertex2f(x, y);
-    glVertex2f(x + 32, y);
-    glVertex2f(x + 32, y + 32);
-    glVertex2f(x, y + 32);
+    glVertex2f(x + w, y);
+    glVertex2f(x + w, y + w);
+    glVertex2f(x, y + w);
     glEnd();
 }
 
@@ -813,7 +857,21 @@ void DrawREADY() {
         for(int y = 0; y < 5; y ++) {
             for(int x = 0; x < 5; x ++) {
                 if(READ[index][y][x]) {
-                    DrawRectangle(x * size + 132 + index * 192, (4 - y) * size + 700, size);
+                    DrawRectangle(x * size + 132 + index * (size * 6), (4 - y) * size + 700, size);
+                }
+            }
+        }
+    }
+}
+
+void DrawSTART() {
+    int size = 15;
+    glColor3f(1.0f, 1.0f, 1.0f);
+    for(int index = 0; index < 5; index ++) {
+        for(int y = 0; y < 5; y ++) {
+            for(int x = 0; x < 5; x ++) {
+                if(START[index][y][x]) {
+                    DrawRectangle(x * size + 350 + index * (size * 6), (4 - y) * size + 450, size);
                 }
             }
         }
@@ -827,6 +885,7 @@ void DrawREADY() {
 void ShowREADY(){
     DrawSpace();
     DrawREADY();
+    DrawSTART();
 }
 
 
