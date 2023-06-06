@@ -273,6 +273,7 @@ int gameoverColor = 0;
 FireCracker * fire[FIRENUM];
 Ball * copyball[100];
 int copycount = 0;
+int life = 3;
 
 /*
  *  Shape Color
@@ -737,7 +738,10 @@ void CollisionDetectionToWindow() {
     ballSpeed.x *= ballPosition.x + ballRadius >= WIDTH ? -1 : 1;
     ballSpeed.x *= ballPosition.x - ballRadius <= 0 ? -1 : 1;
     ballSpeed.y *= ballPosition.y + ballRadius >= HEIGHT ? -1 : 1;
-    ballSpeed.y *= ballPosition.y - ballRadius <= 0 ? -1 : 1;
+    if(ballPosition.y - ballRadius <= 0) {
+        life --;
+        ballSpeed.y *= -1;
+    }
 }
 
 /// 내부 벽과의 충돌을 확인하는 함수
@@ -1514,6 +1518,10 @@ void RenderScene(void) {
             for(int i = 0; i < copycount; i ++) {
                 copyball[i]->ChangePosition();
             }
+        }
+        
+        if(!life) {
+            mode = GAMEOVER;
         }
         
         if(!CountBlock()) {
