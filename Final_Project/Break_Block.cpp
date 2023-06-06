@@ -9,6 +9,7 @@
 #define    STATE_BREAK      0
 #define    STATE_ONE        1
 #define    STATE_TWO        2
+#define    STATE_THREE        3
 #define    MODE_DEFAULT     0
 #define    RECTANGLE_BLOCK_NUM 19
 #define    WALL_NUM         9
@@ -164,6 +165,7 @@ Color slidingBarColor = { 0.6, 0.8, 0.95 };
 Color ballColor = { 0.97, 0.95, 0.99 };
 Color softRed = { 0.99, 0.4, 0.4 };
 Color softGreen = { 0.5, 0.8, 0.7 };
+Color softBlue = { 0.6, 0.8, 0.95 };
 
 /*
  *  Bitmap Setting
@@ -411,6 +413,8 @@ void CreateRectangleBlock() {
 
         rectangleBlock[i].rightBottom.x = startX + xVariation * rectangleBlockLen + rectangleBlockLen;
         rectangleBlock[i].rightBottom.y = startY - rectangleBlockWeight;
+        
+        rectangleBlock[i].state = rand() % 3 + 1;
     }
 }
 
@@ -881,10 +885,13 @@ void ShowRectangleBlock() {
         if(rectangleBlock[i].state) {
             switch (rectangleBlock[i].state) {
                 case STATE_ONE:
-                    glColor3f(0.99, 0.4, 0.4);
+                    glColor3f(softRed.red, softRed.green, softRed.blue);
                     break;
                 case STATE_TWO:
-                    glColor3f(0.5, 0.8, 0.7);
+                    glColor3f(softBlue.red, softBlue.green, softBlue.blue);
+                    break;
+                case STATE_THREE:
+                    glColor3f(softGreen.red, softGreen.green, softGreen.blue);
                 default:
                     break;
             }
