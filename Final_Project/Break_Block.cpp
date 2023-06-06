@@ -199,6 +199,8 @@ float speedY = 6.0;
 float speedSum = sqrt(speedX * speedX + speedY * speedY);
 Vector ballSpeed = { speedX, speedY };
 int beforeTouch = -1;
+float startX = 90;
+float startY = 50;
 
 /// 내부 벽 선언 및 초기화
 Point Wall[WALL_NUM] = {
@@ -222,7 +224,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = GAMECLEAR;
+int  mode  = GAMEREADY;
 bool start = false;
 
 const int star_num = 100;
@@ -1104,6 +1106,18 @@ void ShowRectangleBlock() {
     }
 }
 
+void ShowArrow() {
+    float delta = 2 * PI / 360;
+    float x = slidingBar.center.x + startY * cos(delta * startX);
+    float y = slidingBarWeight + startY * sin(delta * startX);
+    glColor3f(softRed.red, softRed.green, softRed.blue);
+    glLineWidth(5);
+    glBegin(GL_LINES);
+    glVertex2f(slidingBar.center.x, 0);
+    glVertex2f(x, y);
+    glEnd();
+}
+
 
 /*
  *  내부 화면들
@@ -1297,7 +1311,7 @@ void MySpecialKey(int key, int x, int y) {
     switch (key) {
         case GLUT_KEY_LEFT:
             if(!start) {
-                
+                startX += startX < 180 ? + 1 : 0;
             }
             else if(pause) {
                 slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
@@ -1305,7 +1319,7 @@ void MySpecialKey(int key, int x, int y) {
             break;
         case GLUT_KEY_RIGHT:
             if(!start) {
-                
+                startX += startX > 0 ? - 1 : 0;
             }
             else if(pause) {
                 slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
@@ -1323,7 +1337,14 @@ void MySpecialKey(int key, int x, int y) {
                     }
                     break;
                 case GAMERUN:
-                    if (powerHitGauge > 30){
+                    if(!start && startX != 90) {
+                        float delta = 2 * PI / 360;
+                        start = !start;
+                        ballSpeed.x = (startY / 20) * cos(delta * startX);
+                        
+                        ballSpeed.y = (startY / 20) * sin(delta * startX);
+                    }
+                    else if (start && powerHitGauge > 30){
                         powerHitCheck = true;
                         powerHitVariation = powerHitGauge / 20;
                     }
@@ -1343,7 +1364,7 @@ void MySpecialKey(int key, int x, int y) {
                     arrownum = arrownum ? 0 : 1;
                     break;
                 case GAMERUN:
-                    
+                    startY += startY < 100 ? + 1 : 0;
                     break;
             }
             break;
@@ -1353,7 +1374,7 @@ void MySpecialKey(int key, int x, int y) {
                     arrownum = arrownum ? 0 : 1;
                     break;
                 case GAMERUN:
-                    
+                    startY += startY > 20 ? - 1 : 0;
                     break;
             }
             break;
@@ -1390,8 +1411,10 @@ void RenderScene(void) {
         
         // 요소 출력
         glColor3f(ballColor.red, ballColor.green, ballColor.blue);
-        ShowBall();
-
+        if(start) ShowBall();
+        
+        if(!start) ShowArrow();
+        
         glColor3f(slidingBarColor.red, slidingBarColor.green, slidingBarColor.blue);
         ShowSlidingBar();
 
@@ -1400,13 +1423,17 @@ void RenderScene(void) {
 
         ShowRectangleBlock();
 
-        
-        if(CountBlock() && pause) {
+        if(CountBlock() && pause && start) {
             // 공의 위치 결정
+            ChangeSpeed(1);
             ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
             ballPosition.y += ballSpeed.y;
         }
-
+        
+        if(!CountBlock()) {
+            mode = GAMECLEAR;
+        }
+        
         if(!pause) {
             glColor3f(1.0f, 1.0f, 1.0f);
             DrawPAUSE();
