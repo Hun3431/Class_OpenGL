@@ -1184,6 +1184,36 @@ void DrawSpace() {
     }
 }
 
+/// 게이지 바를 출력하는 함수
+void GaugeBar() {
+    /// 게이지바 정도
+    for(int i = 1; i <= (int)powerHitGauge / 7; i ++) {
+        glBegin(GL_POLYGON);
+        glColor3f(ColorList[7 - i].red, ColorList[7 - i].green, ColorList[7 - i].blue);
+        glVertex2f(50.0, 50.0 + (i - 1) * 28.5);
+        glVertex2f(100.0, 50.0 + (i - 1) * 28.5);
+        glVertex2f(100.0, 50.0 + i * 28.5);
+        glVertex2f(50.0, 50.0 + i * 28.5);
+        glEnd();
+    }
+    
+    /// 게이지 바 테두리
+    glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(50.0, 50.0);
+    glVertex2f(100.0, 50.0);
+    glVertex2f(100.0, 50.0 + powerHitMax * 4);
+    glVertex2f(50.0, 50.0 + powerHitMax * 4);
+    glEnd();
+    
+    /// 최소 게이지
+    glBegin(GL_LINES);
+    glColor3f(softRed.red, softRed.green, softRed.blue);
+    glVertex2f(45, 164);
+    glVertex2f(105, 164);
+    glEnd();
+}
+
 /*
  *  Draw Bitmap
  */
@@ -1473,6 +1503,8 @@ void RenderScene(void) {
 
         ShowRectangleBlock();
 
+        GaugeBar();
+        
         if(CountBlock() && pause && start) {
             // 공의 위치 결정
             ChangeSpeed(1);
