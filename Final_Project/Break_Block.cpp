@@ -1,6 +1,8 @@
 #include <GLUT/GLUT.h>
 #include <iostream>
 #include <cmath>
+#include <random>
+#include <ctime>
 #define    PI               M_PI
 #define    WIDTH            1000
 #define    HEIGHT           1000
@@ -10,6 +12,10 @@
 #define    MODE_DEFAULT     0
 #define    RECTANGLE_BLOCK_NUM 19
 #define    WALL_NUM         9
+#define    READY            0
+#define    RUN              1
+#define    GAMEOVER         2
+#define    CLEAR            3
 
 /*
  *  구조체 선언부
@@ -85,6 +91,11 @@ struct Vector {
     }
 };
 
+struct Space {
+    float x;
+    float y;
+    Color c;
+};
 
 /*
  *  변수 선언부
@@ -137,6 +148,11 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
+int  mode  = READY;
+
+const int star_num = 100;
+Space star[star_num];
+
 
 /*
  *  Shape Color
@@ -145,6 +161,7 @@ Color backGroundColor = { 0.1, 0.1, 0.1 };
 Color wallColor = { 0.9, 0.8, 0.5 };
 Color slidingBarColor = { 0.6, 0.8, 0.95 };
 Color ballColor = { 0.97, 0.95, 0.99 };
+
 
 /*
  *  Initial Function
@@ -157,6 +174,21 @@ void InitWall() {
         std::cout << i << ":" << nomalWall[i].x << "|" << nomalWall[i].y << std::endl;
     }
 }
+
+void InitSpace() {
+    srand(time(NULL));
+    for(int i = 0; i < star_num; i ++) {
+        Color color = {
+            red:static_cast <float> (rand()) / static_cast <float> (RAND_MAX),
+            green:static_cast <float> (rand()) / static_cast <float> (RAND_MAX),
+            blue:static_cast <float> (rand()) / static_cast <float> (RAND_MAX)
+        };
+        star[i].c = color;
+        star[i].x = rand() % WIDTH;
+        star[i].y = rand() % HEIGHT;
+    }
+}
+
 
 
 /*
@@ -702,6 +734,38 @@ void ShowRectangleBlock() {
 
 
 /*
+ *  내부 화면들
+ */
+///
+void Draw_Circle(float x, float y, float c_radius) {
+   float    delta;
+   int      num = 36;
+
+   delta = 2 * PI / num;
+   glBegin(GL_POLYGON);
+   for (int i = 0; i < num; i++)
+      glVertex2f(x + c_radius*cos(delta*i), y + c_radius*sin(delta*i));
+   glEnd();
+}
+
+void DrawSpace() {
+    glBegin(GL_POLYGON);
+    for(int i = 0; i < star_num; i ++) {
+        glColor3f(star[i].c.red, star[i].c.green, star[i].c.blue);
+        Draw_Circle(star[i].x, star[i].y,rand()%3);
+    }
+}
+
+
+/*
+ *  GAMEMODE PAGE
+ */
+void ShowREADY(){
+    DrawSpace();
+}
+
+
+/*
  *  Event Callback Function
  */
 /// 스페셜 키가 입력되면 실행되는 콜백함수
@@ -740,40 +804,58 @@ void MyReshape(int w, int h) {
 
 /// Window 화면을 출력할 때 실행되는 콜백함수
 void RenderScene(void) {
-    glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // 충돌 검증
-    CollisionDetectionToWindow();
-    CollisionDetectionToCorner();
-    CollisionDetectionToWall();
-    CollisionDetectionToSlidingBar();
-    CollisionDetectionToRectangleBlock();
-    
-    // 요소 출력
-    glColor3f(ballColor.red, ballColor.green, ballColor.blue);
-    ShowBall();
-
-    glColor3f(slidingBarColor.red, slidingBarColor.green, slidingBarColor.blue);
-    ShowSlidingBar();
-
-    glColor3f(wallColor.red, wallColor.green, wallColor.blue);
-    ShowWall();
-
-    ShowRectangleBlock();
-
-    
-    if(CountBlock() && pause) {
-        // 공의 위치 결정
-        ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
-        ballPosition.y += ballSpeed.y;
+    if(mode == READY) {
+        glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        ShowREADY();
+        
+        glutSwapBuffers();
+        glFlush();
     }
+    else if(mode == RUN){
+        glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
+        glClear(GL_COLOR_BUFFER_BIT);
 
-    glutSwapBuffers();
-    glFlush();
+        // 충돌 검증
+        CollisionDetectionToWindow();
+        CollisionDetectionToCorner();
+        CollisionDetectionToWall();
+        CollisionDetectionToSlidingBar();
+        CollisionDetectionToRectangleBlock();
+        
+        // 요소 출력
+        glColor3f(ballColor.red, ballColor.green, ballColor.blue);
+        ShowBall();
+
+        glColor3f(slidingBarColor.red, slidingBarColor.green, slidingBarColor.blue);
+        ShowSlidingBar();
+
+        glColor3f(wallColor.red, wallColor.green, wallColor.blue);
+        ShowWall();
+
+        ShowRectangleBlock();
+
+        
+        if(CountBlock() && pause) {
+            // 공의 위치 결정
+            ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
+            ballPosition.y += ballSpeed.y;
+        }
+
+        glutSwapBuffers();
+        glFlush();
+    }
+    else if(mode == GAMEOVER) {
+        
+    }
+    else if(mode == CLEAR) {
+        
+    }
 }
 
 int main(int argc, char** argv) {
+    InitSpace();
     InitWall();
     glutInit(&argc, argv);
     CreateRectangleBlock();
