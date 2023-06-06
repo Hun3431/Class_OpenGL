@@ -109,10 +109,11 @@ bool powerShut = false;
 /// 공 선언 및 초기화
 float ballRadius = 10.0;
 Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
-float speedX = 0.5;
-float speedY = 2.0;
+float speedX = 1.0;
+float speedY = 6.0;
 float speedSum = sqrt(speedX * speedX + speedY * speedY);
 Vector ballSpeed = { speedX, speedY };
+int beforeTouch = -1;
 
 /// 내부 벽 선언 및 초기화
 Point Wall[WALL_NUM] = {
@@ -299,9 +300,19 @@ void CollisionDetectionToWindow() {
 void CollisionDetectionToWall(void){
     for(int i = 0; i < WALL_NUM - 1; i ++) {
         /// 좌측 기울기가 - 인 대각선
-        if(i == 1) {
+        if(i == 1 && i != beforeTouch) {
             if (Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) >= ballPosition.x - ballRadius) {
+                    // 공 위치 조정(벽을 넘어가지 않도록)
+                    Point before = { ballPosition.x - ballSpeed.x, ballPosition.y - ballSpeed.y };
+                    Point meet = MeetPoint(Wall[i], Wall[i + 1], ballPosition, before);
+                    float angle = atan(ballSpeed.y / ballSpeed.x);
+                    
+                    std::cout << "좌하단" << std::endl;
+                    
+                    ballPosition.x = meet.x + abs(ballRadius * cos(angle));
+                    ballPosition.y = meet.y + abs(ballRadius * sin(angle));
+                    
                     // 벡터의 정규화
                     ballSpeed.normalize();
                     nomalWall[i].normalize();
@@ -313,18 +324,26 @@ void CollisionDetectionToWall(void){
                     ballSpeed.x = v.x * (speedSum / vSum / 2);
                     ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
-                    // 공 위치 조정(벽을 넘어가지 않도록)
-                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) + ballRadius;
-                    ballPosition.y += ballRadius;
+                    beforeTouch = i;
                     
                     return;
                 }
             }
         }
         /// 상단 기울기가 - 인 대각선
-        else if(i == 4) {
+        else if(i == 4 && i != beforeTouch) {
             if (Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) <= ballPosition.x + ballRadius) {
+                    // 공 위치 조정(벽을 넘어가지 않도록)
+                    Point before = { ballPosition.x - ballSpeed.x, ballPosition.y - ballSpeed.y };
+                    Point meet = MeetPoint(Wall[i], Wall[i + 1], ballPosition, before);
+                    float angle = atan(ballSpeed.y / ballSpeed.x);
+                    
+                    std::cout << "우상단" << std::endl;
+                    
+                    ballPosition.x = meet.x - abs(ballRadius * cos(angle));
+                    ballPosition.y = meet.y - abs(ballRadius * sin(angle));
+                    
                     // 벡터의 정규화
                     ballSpeed.normalize();
                     nomalWall[i].normalize();
@@ -336,18 +355,26 @@ void CollisionDetectionToWall(void){
                     ballSpeed.x = v.x * (speedSum / vSum / 2);
                     ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
-                    // 공 위치 조정(벽을 넘어가지 않도록)
-                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
-                    ballPosition.y -= ballRadius;
+                    beforeTouch = i;
                     
                     return;
                 }
             }
         }
         /// 상단 기울기가 + 인 대각선
-        else if(i == 3) {
+        else if(i == 3 && i != beforeTouch) {
             if (Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) >= ballPosition.x - ballRadius) {
+                    // 공 위치 조정(벽을 넘어가지 않도록)
+                    Point before = { ballPosition.x - ballSpeed.x, ballPosition.y - ballSpeed.y };
+                    Point meet = MeetPoint(Wall[i], Wall[i + 1], ballPosition, before);
+                    float angle = atan(ballSpeed.y / ballSpeed.x);
+                    
+                    std::cout << "좌상단" << std::endl;
+                    
+                    ballPosition.x = meet.x + abs(ballRadius * cos(angle));
+                    ballPosition.y = meet.y - abs(ballRadius * sin(angle));
+                    
                     // 벡터의 정규화
                     ballSpeed.normalize();
                     nomalWall[i].normalize();
@@ -359,18 +386,26 @@ void CollisionDetectionToWall(void){
                     ballSpeed.x = v.x * (speedSum / vSum / 2);
                     ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
-                    // 공 위치 조정(벽을 넘어가지 않도록)
-                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) + ballRadius;
-                    ballPosition.y -= ballRadius;
+                    beforeTouch = i;
                     
                     return;
                 }
             }
         }
         /// 우측 기울기가 + 인 대각선
-        else if(i == 6) {
+        else if(i == 6 && i != beforeTouch) {
             if (Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
                 if (return_X(ballPosition.y, Wall[i], Wall[i+1]) <= ballPosition.x + ballRadius) {
+                    // 공 위치 조정(벽을 넘어가지 않도록)
+                    Point before = { ballPosition.x - ballSpeed.x, ballPosition.y - ballSpeed.y };
+                    Point meet = MeetPoint(Wall[i], Wall[i + 1], ballPosition, before);
+                    float angle = atan(ballSpeed.y / ballSpeed.x);
+                    
+                    std::cout << "우하단" << std::endl;
+                
+                    ballPosition.x = meet.x - abs(ballRadius * cos(angle));
+                    ballPosition.y = meet.y + abs(ballRadius * sin(angle));
+                    
                     // 벡터의 정규화
                     ballSpeed.normalize();
                     nomalWall[i].normalize();
@@ -382,49 +417,55 @@ void CollisionDetectionToWall(void){
                     ballSpeed.x = v.x * (speedSum / vSum / 2);
                     ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
-                    // 공 위치 조정(벽을 넘어가지 않도록)
-                    ballPosition.x = return_X(ballPosition.y, Wall[i], Wall[i+1]) - ballRadius;
-                    ballPosition.y += ballRadius;
+                    beforeTouch = i;
                     
                     return;
                 }
             }
         }
         /// 좌측 y 축에 평행한 직선
-        else if(i == 0) {
+        else if(i == 0 && i != beforeTouch) {
             if(Wall[i].x >= ballPosition.x - ballRadius && Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
                 ballSpeed.x *= -1;
-                ballPosition.x = Wall[i].x + ballRadius;
+                ballPosition.x = Wall[i].x + ballRadius + 2;
+                
+                beforeTouch = i;
                 
                 return;
             }
         }
         /// 우측 y 축에 평행한 직선
-        else if(i == 7) {
+        else if(i == 7 && i != beforeTouch) {
             if(Wall[i].x <= ballPosition.x + ballRadius && Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
                 ballSpeed.x *= -1;
-                ballPosition.x = Wall[i].x - ballRadius;
+                ballPosition.x = Wall[i].x - ballRadius - 2;
+                
+                beforeTouch = i;
                 
                 return;
             }
         }
         /// 좌측 x 축에 평행한 직선
-        else if(i == 2) {
+        else if(i == 2 && i != beforeTouch) {
             if(Wall[i].x <= ballPosition.x + ballRadius && Wall[i + 1].x >= ballPosition.x - ballRadius) {
                 if(Wall[i].y <= ballPosition.y + ballRadius) {
                     ballSpeed.y *= -1;
-                    ballPosition.y = Wall[i].y - ballRadius;
+                    ballPosition.y = Wall[i].y - ballRadius - 2;
+                    
+                    beforeTouch = i;
                     
                     return;
                 }
             }
         }
         /// 우측 x 축에 평행한 직선
-        else if(i == 5) {
+        else if(i == 5 && i != beforeTouch) {
             if(Wall[i].x <= ballPosition.x + ballRadius && Wall[i + 1].x >= ballPosition.x - ballRadius) {
                 if(Wall[i].y <= ballPosition.y + ballRadius) {
                     ballSpeed.y *= -1;
-                    ballPosition.y = Wall[i].y - ballRadius;
+                    ballPosition.y = Wall[i].y - ballRadius - 2;
+                    
+                    beforeTouch = i;
                     
                     return;
                 }
@@ -449,7 +490,7 @@ void CollisionDetectionToSlidingBar() {
 /// 직사각형 벽돌과의 충돌을 확인하는 함수
 void CollisionDetectionToRectangleBlock() {
     for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
-        if(rectangleBlock[i].state) {
+        if(rectangleBlock[i].state && i + WALL_NUM != beforeTouch) {
             // 벽돌의 모서리와의 충돌을 확인
             // 좌측 하단
             float distance = pow(ballPosition.x - rectangleBlock[i].leftBottom.x, 2) + pow(ballPosition.y - rectangleBlock[i].leftBottom.y, 2);
@@ -462,6 +503,8 @@ void CollisionDetectionToRectangleBlock() {
                 ballSpeed.y = v.y * (speedSum / vSum / 2);
                 
                 rectangleBlock[i].state --;
+                
+                beforeTouch = i + WALL_NUM;
                 
                 return;
             }
@@ -478,6 +521,8 @@ void CollisionDetectionToRectangleBlock() {
                 
                 rectangleBlock[i].state --;
                 
+                beforeTouch = i + WALL_NUM;
+                
                 return;
             }
             
@@ -493,6 +538,8 @@ void CollisionDetectionToRectangleBlock() {
                 
                 rectangleBlock[i].state --;
                 
+                beforeTouch = i + WALL_NUM;
+                
                 return;
             }
             
@@ -507,6 +554,8 @@ void CollisionDetectionToRectangleBlock() {
                 ballSpeed.y = v.y * (speedSum / vSum / 2);
                 
                 rectangleBlock[i].state --;
+                
+                beforeTouch = i + WALL_NUM;
                 
                 return;
             }
@@ -528,6 +577,8 @@ void CollisionDetectionToRectangleBlock() {
                     else {
                         ballSpeed.y *= -1;
                     }
+                    
+                    beforeTouch = i + WALL_NUM;
                     
                     return;
                 }
@@ -662,6 +713,13 @@ void RenderScene(void) {
     glClearColor(backGroundColor.red, backGroundColor.green, backGroundColor.blue, backGroundColor.clamp);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // 충돌 검증
+    CollisionDetectionToWindow();
+    CollisionDetectionToCorner();
+    CollisionDetectionToWall();
+    CollisionDetectionToSlidingBar();
+    CollisionDetectionToRectangleBlock();
+    
     // 요소 출력
     glColor3f(ballColor.red, ballColor.green, ballColor.blue);
     ShowBall();
@@ -674,12 +732,6 @@ void RenderScene(void) {
 
     ShowRectangleBlock();
 
-    // 충돌 검증
-    CollisionDetectionToWindow();
-    CollisionDetectionToCorner();
-    CollisionDetectionToWall();
-    CollisionDetectionToSlidingBar();
-    CollisionDetectionToRectangleBlock();
     
     if(CountBlock() && pause) {
         // 공의 위치 결정
