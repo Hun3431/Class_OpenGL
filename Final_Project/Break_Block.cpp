@@ -45,6 +45,18 @@ typedef struct _Color {
     float   clamp = 0.0;
 } Color;
 
+Color ColorList[] = {
+    { 0.99, 0.4, 0.4 },
+    { 0.94, 0.6, 0.45 },
+    { 0.9, 0.8, 0.5 },
+    { 0.5, 0.8, 0.7 },
+    { 0.5, 0.8, 0.9 },
+    { 0.3, 0.4, 0.9 },
+    { 0.6, 0.4, 0.95 },
+    { 0.9, 0.9, 0.8 },
+    { 0.4, 0.4, 0.4 }
+};
+
 /// 벽돌의 정보를 나타내는 구조체
 typedef struct _Block {
     Point leftTop = { 0, 0 };
@@ -53,9 +65,43 @@ typedef struct _Block {
     Point rightBottom = { 0, 0 };
     int mode = MODE_DEFAULT;
     int state = STATE_TWO;
+    bool modeState = true;
     
     void Event() {
-        
+        if(modeState && !state) {
+            float x = (rightBottom.x - leftBottom.x) / 2 + leftBottom.x;
+            float y = rightBottom.y;
+            
+            switch (mode) {
+                case MODE_COPY:
+                    glColor3f(ColorList[1].red, ColorList[1].green, ColorList[1].blue);
+                    break;
+                case MODE_SCORE:
+                    glColor3f(ColorList[5].red, ColorList[5].green, ColorList[5].blue);
+                    break;
+                case MODE_SIZEUP:
+                    glColor3f(ColorList[7].red, ColorList[7].green, ColorList[7].blue);
+                    break;
+                case MODE_SIZEDOWN:
+                    glColor3f(ColorList[8].red, ColorList[8].green, ColorList[8].blue);
+                    break;
+                default:
+                    break;
+            }
+            Show(x, y);
+            rightBottom.y -= 0.5;
+            
+        }
+    }
+    void Show(float x, float y) {
+        int num = 32;
+        float radius = 5;
+        float delta = 2 * PI / num;
+        glBegin(GL_POLYGON);
+        for(int i = 0; i < num; i ++) {
+            glVertex2f(x + radius * cos(delta * i), y + + radius * sin(delta * i));
+        }
+        glEnd();
     }
 } Block;
 
@@ -269,7 +315,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = GAMECLEAR;
+int  mode  = GAMEREADY;
 bool start = false;
 
 const int star_num = 100;
@@ -295,18 +341,6 @@ Color softWhite = { 0.97, 0.95, 0.99 };
 Color softRed = { 0.99, 0.4, 0.4 };
 Color softGreen = { 0.5, 0.8, 0.7 };
 Color softBlue = { 0.6, 0.8, 0.95 };
-
-Color ColorList[] = {
-    { 0.99, 0.4, 0.4 },
-    { 0.94, 0.6, 0.45 },
-    { 0.9, 0.8, 0.5 },
-    { 0.5, 0.8, 0.7 },
-    { 0.5, 0.8, 0.9 },
-    { 0.3, 0.4, 0.9 },
-    { 0.6, 0.4, 0.95 },
-    { 0.9, 0.9, 0.8 },
-    { 0.4, 0.4, 0.4 }
-};
 
 /*
  *  Bitmap Setting
@@ -733,8 +767,9 @@ void CreateRectangleBlock() {
         rectangleBlock[i].rightBottom.x = startX + xVariation * rectangleBlockLen + rectangleBlockLen;
         rectangleBlock[i].rightBottom.y = startY - rectangleBlockWeight;
         
-        int mode = rand() % 19 - 15;
-        rectangleBlock[i].mode = mode < 1 ? MODE_DEFAULT : mode;
+//        int mode = rand() % 19 - 15;
+//        rectangleBlock[i].mode = mode < 1 ? MODE_DEFAULT : mode;
+        rectangleBlock[i].mode = rand() % 4 + 1;
         
         rectangleBlock[i].state = rand() % 3 + 1;
     }
@@ -1245,6 +1280,9 @@ void ShowRectangleBlock() {
             glVertex2f(rectangleBlock[i].rightBottom.x, rectangleBlock[i].rightBottom.y);
             glVertex2f(rectangleBlock[i].rightTop.x, rectangleBlock[i].rightTop.y);
             glEnd();
+        }
+        else {
+            rectangleBlock[i].Event();
         }
     }
 }
