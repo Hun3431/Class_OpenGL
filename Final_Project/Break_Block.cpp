@@ -91,12 +91,12 @@ typedef struct _Block {
                 default:
                     break;
             }
-            Show(x, y);
+            Show();
             y -= 0.5;
             if(y < 1) modeState = false;
         }
     }
-    void Show(float x, float y) {
+    void Show() {
         int num = 32;
         float radius = 5;
         float delta = 2 * PI / num;
@@ -1435,7 +1435,26 @@ void ShowRectangleBlock() {
             glEnd();
         }
         else {
-            rectangleBlock[i].Event();
+            if(pause) rectangleBlock[i].Event();
+            else {
+                switch (rectangleBlock[i].mode) {
+                case MODE_COPY:
+                    glColor3f(ColorList[1].red, ColorList[1].green, ColorList[1].blue);
+                    break;
+                case MODE_SCORE:
+                    glColor3f(ColorList[5].red, ColorList[5].green, ColorList[5].blue);
+                    break;
+                case MODE_SIZEUP:
+                    glColor3f(ColorList[7].red, ColorList[7].green, ColorList[7].blue);
+                    break;
+                case MODE_SIZEDOWN:
+                    glColor3f(ColorList[8].red, ColorList[8].green, ColorList[8].blue);
+                    break;
+                default:
+                    break;
+                }
+                rectangleBlock[i].Show();
+            }
         }
     }
 }
