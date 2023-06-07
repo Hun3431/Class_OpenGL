@@ -74,7 +74,7 @@ typedef struct _Block {
             x = (rightBottom.x - leftBottom.x) / 2 + leftBottom.x;
             y = rightBottom.y;
         }
-        if(modeState && !state) {
+        if(modeState && !state && mode) {
             switch (mode) {
                 case MODE_COPY:
                     glColor3f(ColorList[1].red, ColorList[1].green, ColorList[1].blue);
@@ -770,9 +770,9 @@ void CreateRectangleBlock() {
         rectangleBlock[i].rightBottom.x = startX + xVariation * rectangleBlockLen + rectangleBlockLen;
         rectangleBlock[i].rightBottom.y = startY - rectangleBlockWeight;
         
-//        int mode = rand() % 19 - 15;
-//        rectangleBlock[i].mode = mode < 1 ? MODE_DEFAULT : mode;
-        rectangleBlock[i].mode = rand() % 4 + 1;
+        int mode = rand() % 19 - 15;
+        rectangleBlock[i].mode = mode < 1 ? MODE_DEFAULT : mode;
+//        rectangleBlock[i].mode = rand() % 4 + 1;
         
         rectangleBlock[i].state = rand() % 3 + 1;
     }
