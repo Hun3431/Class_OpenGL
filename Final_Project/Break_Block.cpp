@@ -1748,7 +1748,7 @@ void DrawNumber() {
         for(int y = 0; y < 5; y ++) {
             for(int x = 0; x < 5; x ++) {
                 if(NUMBER[num[index]][y][x]) {
-                    DrawRectangle(x * size + 700 + index * (size * 6), (4 - y) * size + 50, size);
+                    DrawRectangle(x * size + 50 + index * (size * 6), (4 - y) * size + 50, size);
                 }
             }
         }
