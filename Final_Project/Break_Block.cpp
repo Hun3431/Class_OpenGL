@@ -3,6 +3,7 @@
 #include <cmath>
 #include <random>
 #include <ctime>
+
 #define    PI               M_PI
 #define    WIDTH            1000
 #define    HEIGHT           1000
@@ -13,6 +14,10 @@
 #define    STATE_THREE      3
 
 #define    MODE_DEFAULT     0
+#define    MODE_SIZEUP      1
+#define    MODE_SIZEDOWN    2
+#define    MODE_SCORE       3
+#define    MODE_COPY        4
 
 #define    RECTANGLE_BLOCK_NUM 19
 #define    WALL_NUM         9
@@ -48,6 +53,10 @@ typedef struct _Block {
     Point rightBottom = { 0, 0 };
     int mode = MODE_DEFAULT;
     int state = STATE_TWO;
+    
+    void Event() {
+        
+    }
 } Block;
 
 /// 하단의 슬라이딩 바의 정보를 나타내는 구조체
@@ -260,7 +269,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = GAMEREADY;
+int  mode  = GAMECLEAR;
 bool start = false;
 
 const int star_num = 100;
@@ -723,6 +732,9 @@ void CreateRectangleBlock() {
 
         rectangleBlock[i].rightBottom.x = startX + xVariation * rectangleBlockLen + rectangleBlockLen;
         rectangleBlock[i].rightBottom.y = startY - rectangleBlockWeight;
+        
+        int mode = rand() % 19 - 15;
+        rectangleBlock[i].mode = mode < 1 ? MODE_DEFAULT : mode;
         
         rectangleBlock[i].state = rand() % 3 + 1;
     }
@@ -1580,9 +1592,19 @@ void MySpecialKey(int key, int x, int y) {
             break;
         // 게임 일시정지
         case 27:
-            pause = pause ? false : true;
+            switch (mode) {
+                case GAMERUN:
+                    pause = pause ? false : true;
+                    break;
+                case GAMECLEAR:
+                    exit(0);
+                    break;
+                case GAMEOVER:
+                    exit(0);
+                default:
+                    break;
+            }
             break;
-            
         case GLUT_KEY_UP:
             switch (mode) {
                 case GAMEREADY:
