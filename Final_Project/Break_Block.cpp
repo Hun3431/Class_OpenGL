@@ -93,6 +93,7 @@ typedef struct _Block {
             }
             Show(x, y);
             y -= 0.5;
+            if(y < 1) modeState = false;
         }
     }
     void Show(float x, float y) {
@@ -332,7 +333,7 @@ Ball * copyball[100];
 int copycount = 0;
 int life = 3;
 int runtime = 0;
-
+int score = 0;
 
 /*
  *  Shape Color
@@ -1117,6 +1118,8 @@ void CollisionDetectionToRectangleBlock() {
                 
                 rectangleBlock[i].state --;
                 
+                if(!rectangleBlock[i].state) score += 50;
+                
                 beforeTouch = i + WALL_NUM;
                 
                 return;
@@ -1133,6 +1136,7 @@ void CollisionDetectionToRectangleBlock() {
                 ballSpeed.y = v.y * (speedSum / vSum / 2);
                 
                 rectangleBlock[i].state --;
+                if(!rectangleBlock[i].state) score += 50;
                 
                 beforeTouch = i + WALL_NUM;
                 
@@ -1150,6 +1154,7 @@ void CollisionDetectionToRectangleBlock() {
                 ballSpeed.y = v.y * (speedSum / vSum / 2);
                 
                 rectangleBlock[i].state --;
+                if(!rectangleBlock[i].state) score += 50;
                 
                 beforeTouch = i + WALL_NUM;
                 
@@ -1167,6 +1172,7 @@ void CollisionDetectionToRectangleBlock() {
                 ballSpeed.y = v.y * (speedSum / vSum / 2);
                 
                 rectangleBlock[i].state --;
+                if(!rectangleBlock[i].state) score += 50;
                 
                 beforeTouch = i + WALL_NUM;
                 
@@ -1178,6 +1184,7 @@ void CollisionDetectionToRectangleBlock() {
                 if(ballPosition.x + ballRadius >= rectangleBlock[i].leftBottom.x && ballPosition.x - ballRadius <= rectangleBlock[i].rightBottom.x){
                     
                     rectangleBlock[i].state --;
+                    if(!rectangleBlock[i].state) score += 50;
                     
                     Point _block;
                     _block.x = rectangleBlock[i].leftBottom.x + rectangleBlockLen / 2;
@@ -1214,6 +1221,24 @@ void CollisionDetectionToCorner() {
     }
 }
 
+/* EVENT */
+void CopyEvent() {
+    CreateCopyBall();
+}
+
+void ScoreEvent() {
+    score += 100;
+}
+
+void SizeUpEvent() {
+    ballRadius += ballRadius < 30 ? 5 : 0;
+}
+
+void SizeDownEvent() {
+    ballRadius -= ballRadius > 5 ? 5 : 0 ;
+}
+
+
 /// 슬라이딩바와 충돌을 확인하는 함수
 void CollisionDetectionToItem() {
     for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
@@ -1224,15 +1249,19 @@ void CollisionDetectionToItem() {
                     switch (rectangleBlock[i].mode) {
                         case MODE_COPY:
                             std::cout << "MODE_COPY" << std::endl;
+                            CopyEvent();
                             break;
                         case MODE_SCORE:
                             std::cout << "MODE_SCORE" << std::endl;
+                            ScoreEvent();
                             break;
                         case MODE_SIZEUP:
                             std::cout << "MODE_SIZEUP" << std::endl;
+                            SizeUpEvent();
                             break;
                         case MODE_SIZEDOWN:
                             std::cout << "MODE_SIZEDOWN" << std::endl;
+                            SizeDownEvent();
                             break;
                             
                         default:
@@ -1575,6 +1604,30 @@ void DrawTimer() {
     if(start && pause && mode == GAMERUN) runtime ++;
 }
 
+void DrawScore() {
+    glColor3f(softYellow.red, softYellow.green, softYellow.blue);
+    int size = 10;
+    int yscore = score;
+    int num[4] = { 0 };
+    
+    num[0] = yscore / 1000;
+    yscore %= 1000;
+    num[1] = yscore / 100;
+    yscore %= 100;
+    num[2] = yscore / 10;
+    num[3] = yscore % 10;
+    
+    for(int index = 0; index < 4; index ++) {
+        for(int y = 0; y < 5; y ++) {
+            for(int x = 0; x < 5; x ++) {
+                if(NUMBER[num[index]][y][x]) {
+                    DrawRectangle(x * size + 100 + index * (size * 6), (4 - y) * size + 900, size);
+                }
+            }
+        }
+    }
+}
+
 
 
 /*
@@ -1631,7 +1684,7 @@ void MySpecialKey(int key, int x, int y) {
                 slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
             }
             break;
-        // 슬라이딩바를 움직여 공의 속도 상승
+        // 스페이스바
         case 32:
             switch (mode) {
                 case GAMEREADY:
@@ -1654,7 +1707,6 @@ void MySpecialKey(int key, int x, int y) {
                         powerHitCheck = true;
                         powerHitVariation = powerHitGauge / 20;
                     }
-                    CreateCopyBall();
                     break;
                 default:
                     break;
@@ -1719,6 +1771,8 @@ void RenderScene(void) {
         ShowREADY();
     }
     else if(mode == GAMERUN){
+        //int yscore = score + (RECTANGLE_BLOCK_NUM - CountBlock() * 50);
+
         // 충돌 검증
         CollisionDetectionToWindow();
         CollisionDetectionToCorner();
@@ -1751,7 +1805,7 @@ void RenderScene(void) {
         GaugeBar();
         ShowLife();
         DrawTimer();
-        
+        DrawScore();
         if(CountBlock() && pause && start) {
             // 공의 위치 결정
             ChangeSpeed(1);
