@@ -1962,11 +1962,14 @@ void RenderScene(void) {
     else if(mode == GAMEOVER) {
         ShowGAMEOVER();
         gameoverColor = gameoverColor == 0 ? 80 : gameoverColor - 1;
+        DrawTimer();
         DrawNumber();
+        DrawScore();
     }
     else if(mode == GAMECLEAR) {
         ShowCLEAR();
         DrawNumber();
+        DrawScore();
     }
     glutSwapBuffers();
     glFlush();
