@@ -1720,6 +1720,21 @@ void DrawScore() {
     }
 }
 
+void DrawNumber() {
+    int size = 5;
+    int num[] = { 2, 0, 1, 9, 3, 2, 1, 0 };
+    
+    for(int index = 0; index < 8; index ++) {
+        glColor3f(ColorList[index].red, ColorList[index].green, ColorList[index].blue);
+        for(int y = 0; y < 5; y ++) {
+            for(int x = 0; x < 5; x ++) {
+                if(NUMBER[num[index]][y][x]) {
+                    DrawRectangle(x * size + 700 + index * (size * 6), (4 - y) * size + 50, size);
+                }
+            }
+        }
+    }
+}
 
 
 /*
@@ -1861,6 +1876,7 @@ void RenderScene(void) {
     
     if(mode == GAMEREADY) {
         ShowREADY();
+        DrawNumber();
     }
     else if(mode == GAMERUN){
         //int yscore = score + (RECTANGLE_BLOCK_NUM - CountBlock() * 50);
@@ -1927,9 +1943,11 @@ void RenderScene(void) {
     else if(mode == GAMEOVER) {
         ShowGAMEOVER();
         gameoverColor = gameoverColor == 0 ? 80 : gameoverColor - 1;
+        DrawNumber();
     }
     else if(mode == GAMECLEAR) {
         ShowCLEAR();
+        DrawNumber();
     }
     glutSwapBuffers();
     glFlush();
