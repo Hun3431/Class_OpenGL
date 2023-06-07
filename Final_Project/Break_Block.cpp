@@ -1221,21 +1221,113 @@ void CollisionDetectionToCorner() {
     }
 }
 
-/* EVENT */
-void CopyEvent() {
-    CreateCopyBall();
-}
+/// 직사각형 벽돌과 복사된 공의 충돌을 확인하는 함수
+void CollisionDetectionToCopyBall() {
+    for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
+        for(int j = 0; j < copycount; j ++) {
 
-void ScoreEvent() {
-    score += 100;
-}
+            if(rectangleBlock[i].state && i + WALL_NUM != copyball[j]->beforeTouch) {
+                // 벽돌의 모서리와의 충돌을 확인
+                // 좌측 하단
+                float distance = pow(copyball[j]->ballPosition.x - rectangleBlock[i].leftBottom.x, 2) + pow(copyball[j]->ballPosition.y - rectangleBlock[i].leftBottom.y, 2);
+                if(distance <= copyball[j]->ballRadius * copyball[j]->ballRadius) {
+                    std::cout << "벽돌 좌측 하단 충돌" << std::endl;
+                    Vector v = { -1.0, -1.0 };
+                    float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                        
+                    copyball[j]->ballSpeed.x = v.x * (speedSum / vSum / 2);
+                    copyball[j]->ballSpeed.y = v.y * (speedSum / vSum / 2);
+                    
+                    rectangleBlock[i].state --;
+                    
+                    if(!rectangleBlock[i].state) score += 50;
+                    
+                    copyball[j]->beforeTouch = i + WALL_NUM;
+                    
+                    return;
+                }
+                
+                // 우측 하단
+                distance = pow(copyball[j]->ballPosition.x - rectangleBlock[i].rightBottom.x, 2) + pow(copyball[j]->ballPosition.y - rectangleBlock[i].rightBottom.y, 2);
+                if(distance <= copyball[j]->ballRadius * copyball[j]->ballRadius) {
+                    std::cout << "벽돌 우측 하단 충돌" << std::endl;
+                    Vector v = { 1.0, -1.0 };
+                    float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                        
+                    copyball[j]->ballSpeed.x = v.x * (speedSum / vSum / 2);
+                    copyball[j]->ballSpeed.y = v.y * (speedSum / vSum / 2);
+                    
+                    rectangleBlock[i].state --;
+                    if(!rectangleBlock[i].state) score += 50;
+                    
+                    copyball[j]->beforeTouch = i + WALL_NUM;
+                    
+                    return;
+                }
+                
+                // 우측 상단
+                distance = pow(copyball[j]->ballPosition.x - rectangleBlock[i].rightTop.x, 2) + pow(copyball[j]->ballPosition.y - rectangleBlock[i].rightTop.y, 2);
+                if(distance <= copyball[j]->ballRadius * copyball[j]->ballRadius) {
+                    std::cout << "벽돌 우측 상단 충돌" << std::endl;
+                    Vector v = { 1.0, 1.0 };
+                    float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                        
+                    copyball[j]->ballSpeed.x = v.x * (speedSum / vSum / 2);
+                    copyball[j]->ballSpeed.y = v.y * (speedSum / vSum / 2);
+                    
+                    rectangleBlock[i].state --;
+                    if(!rectangleBlock[i].state) score += 50;
+                    
+                    copyball[j]->beforeTouch = i + WALL_NUM;
+                    
+                    return;
+                }
+                
+                // 좌측 상단
+                distance = pow(copyball[j]->ballPosition.x - rectangleBlock[i].leftTop.x, 2) + pow(copyball[j]->ballPosition.y - rectangleBlock[i].leftTop.y, 2);
+                if(distance <= copyball[j]->ballRadius * copyball[j]->ballRadius) {
+                    std::cout << "벽돌 좌측 상단 충돌" << std::endl;
+                    Vector v = { -1.0, 1.0 };
+                    float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                        
+                    copyball[j]->ballSpeed.x = v.x * (speedSum / vSum / 2);
+                    copyball[j]->ballSpeed.y = v.y * (speedSum / vSum / 2);
+                    
+                    rectangleBlock[i].state --;
+                    if(!rectangleBlock[i].state) score += 50;
+                    
+                    copyball[j]->beforeTouch = i + WALL_NUM;
+                    
+                    return;
+                }
+                
+                // 공이 벽돌과 충돌을 확인
+                if(copyball[j]->ballPosition.y + copyball[j]->ballRadius >= rectangleBlock[i].leftBottom.y && copyball[j]->ballPosition.y - copyball[j]->ballRadius <= rectangleBlock[i].leftTop.y) {
+                    if(copyball[j]->ballPosition.x + copyball[j]->ballRadius >= rectangleBlock[i].leftBottom.x && copyball[j]->ballPosition.x - copyball[j]->ballRadius <= rectangleBlock[i].rightBottom.x){
+                        
+                        rectangleBlock[i].state --;
+                        if(!rectangleBlock[i].state) score += 50;
+                        
+                        Point _block;
+                        _block.x = rectangleBlock[i].leftBottom.x + rectangleBlockLen / 2;
+                        _block.y = rectangleBlock[i].leftBottom.y + rectangleBlockWeight / 2;
+                        float inc = inclination(copyball[j]->ballPosition, _block);
+                        
+                        if(inc < 0.5 && inc > -0.5) {
+                            copyball[j]->ballSpeed.x *= -1;
+                        }
+                        else {
+                            copyball[j]->ballSpeed.y *= -1;
+                        }
 
-void SizeUpEvent() {
-    ballRadius += ballRadius < 30 ? 5 : 0;
-}
-
-void SizeDownEvent() {
-    ballRadius -= ballRadius > 5 ? 5 : 0 ;
+                        copyball[j]->beforeTouch = i + WALL_NUM;
+                        
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -1249,19 +1341,19 @@ void CollisionDetectionToItem() {
                     switch (rectangleBlock[i].mode) {
                         case MODE_COPY:
                             std::cout << "MODE_COPY" << std::endl;
-                            CopyEvent();
+                            CreateCopyBall();
                             break;
                         case MODE_SCORE:
                             std::cout << "MODE_SCORE" << std::endl;
-                            ScoreEvent();
+                            score += 100;
                             break;
                         case MODE_SIZEUP:
                             std::cout << "MODE_SIZEUP" << std::endl;
-                            SizeUpEvent();
+                            ballRadius += ballRadius < 50 ? 4 : 0;
                             break;
                         case MODE_SIZEDOWN:
                             std::cout << "MODE_SIZEDOWN" << std::endl;
-                            SizeDownEvent();
+                            ballRadius -= ballRadius > 5 ? 2 : 0 ;
                             break;
                             
                         default:
@@ -1780,6 +1872,8 @@ void RenderScene(void) {
         CollisionDetectionToSlidingBar();
         CollisionDetectionToRectangleBlock();
         CollisionDetectionToItem();
+        CollisionDetectionToCopyBall();
+        
         if(start) {
             for(int i = 0; i < copycount; i ++) {
                 copyball[i]->Show();
