@@ -66,12 +66,15 @@ typedef struct _Block {
     int mode = MODE_DEFAULT;
     int state = STATE_TWO;
     bool modeState = true;
+    float x = 0;
+    float y = 0;
     
     void Event() {
+        if(y == 0 && modeState) {
+            x = (rightBottom.x - leftBottom.x) / 2 + leftBottom.x;
+            y = rightBottom.y;
+        }
         if(modeState && !state) {
-            float x = (rightBottom.x - leftBottom.x) / 2 + leftBottom.x;
-            float y = rightBottom.y;
-            
             switch (mode) {
                 case MODE_COPY:
                     glColor3f(ColorList[1].red, ColorList[1].green, ColorList[1].blue);
@@ -89,8 +92,7 @@ typedef struct _Block {
                     break;
             }
             Show(x, y);
-            rightBottom.y -= 0.5;
-            
+            y -= 0.5;
         }
     }
     void Show(float x, float y) {
@@ -1212,6 +1214,36 @@ void CollisionDetectionToCorner() {
     }
 }
 
+/// 슬라이딩바와 충돌을 확인하는 함수
+void CollisionDetectionToItem() {
+    for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
+        if(!rectangleBlock[i].state && rectangleBlock[i].modeState){
+            if(rectangleBlock[i].y < slidingBar.center.y + slidingBar.weight) {
+                if(rectangleBlock[i].x < slidingBar.center.x + slidingBarLen / 2 && rectangleBlock[i].x > slidingBar.center.x - slidingBarLen / 2){
+                    rectangleBlock[i].modeState = false;
+                    switch (rectangleBlock[i].mode) {
+                        case MODE_COPY:
+                            std::cout << "MODE_COPY" << std::endl;
+                            break;
+                        case MODE_SCORE:
+                            std::cout << "MODE_SCORE" << std::endl;
+                            break;
+                        case MODE_SIZEUP:
+                            std::cout << "MODE_SIZEUP" << std::endl;
+                            break;
+                        case MODE_SIZEDOWN:
+                            std::cout << "MODE_SIZEDOWN" << std::endl;
+                            break;
+                            
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 
 /*
@@ -1693,7 +1725,7 @@ void RenderScene(void) {
         CollisionDetectionToWall();
         CollisionDetectionToSlidingBar();
         CollisionDetectionToRectangleBlock();
-        
+        CollisionDetectionToItem();
         if(start) {
             for(int i = 0; i < copycount; i ++) {
                 copyball[i]->Show();
@@ -1725,7 +1757,7 @@ void RenderScene(void) {
             ChangeSpeed(1);
             ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
             ballPosition.y += ballSpeed.y;
-            std::cout << copycount << std::endl;
+
             for(int i = 0; i < copycount; i ++) {
                 copyball[i]->ChangePosition();
             }
