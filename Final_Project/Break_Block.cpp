@@ -277,6 +277,14 @@ public:
     
 };
 
+typedef struct _RanKing {
+    string name = "unk";
+    int score = 1234;
+    int time = 12345;
+} RanKing;
+
+RanKing ranking[5];
+
 /*
  *  변수 선언부
  */
@@ -331,7 +339,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = GAMEHELP;
+int  mode  = GAMERANKING;
 bool start = false;
 
 const int star_num = 100;
@@ -1704,6 +1712,15 @@ void DrawHelp() {
     }
 }
 
+void DrawRank() {
+    int size = 20;
+    string str = "RANK";
+    for(int index = 0; index < 4; index ++) {
+        glColor3f(softYellow.red, softYellow.green, softYellow.blue);
+        DrawALPHA(270 + index * (size * 6), 800, size, str.at(index));
+    }
+}
+
 void DrawMEMO(float startX, float startY, int size, string str) {
     for(int index = 0; index < str.length(); index ++) {
         DrawALPHA(startX + index * (size * 6), startY, size, str.at(index));
@@ -1780,6 +1797,60 @@ void ShowHELP() {
     DrawMEMO(startX, startY, size, "If you destroy a block you will get");
     DrawMEMO(startX, startY - 40, size, "a special item");
 
+    
+    size = 3;
+    startX = 650;
+    startY = 50;
+    glColor3f(softRed.red, softRed.green, softRed.blue);
+    DrawMEMO(startX, startY, size, "Push esc to back");
+}
+
+void ReverseNum(int num, int* arr, int len) {
+    for(int i = 0; i < len; i ++) {
+        arr[len - 1 - i] = num % 10;
+        num /= 10;
+    }
+}
+
+void ShowRANK() {
+    DrawRank();
+    
+    glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    
+    float startX = 40;
+    float startY = 700;
+    float size = 6;
+    
+    DrawMEMO(startX, startY, size, "NO");
+    DrawMEMO(startX + 125, startY, size, "user");
+    DrawMEMO(startX + 360, startY, size, "score");
+    DrawMEMO(startX + 680, startY, size, "time");
+    
+    startX = 150;
+    startY = 600;
+    size = 10;
+    
+    for(int i = 0; i < 5; i ++) {
+        glColor3f(ColorList[i * 2].red, ColorList[i * 2].green, ColorList[i * 2].blue);
+        DrawNUM(startX - 100, startY, size, i + 1);
+        DrawMEMO(startX, startY, size, ranking[i].name);
+        
+        int score[4];
+    
+        ReverseNum(ranking[i].score, score, 4);
+        for(int j = 0; j < 4; j ++) {
+            DrawNUM(startX + 220 + j * 60, startY, size, score[j]);
+        }
+        
+        int timer[5];
+        
+        ReverseNum(ranking[i].time, timer, 5);
+        for(int j = 0; j < 5; j ++) {
+            DrawNUM(startX + 500 + j * 60, startY, size, timer[j]);
+        }
+        
+        startY -= 110;
+    }
     
     size = 3;
     startX = 650;
@@ -1884,6 +1955,9 @@ void MySpecialKey(int key, int x, int y) {
                         exit(0);
                         break;
                     case GAMEHELP:
+                        mode = GAMEREADY;
+                        break;
+                    case GAMERANKING:
                         mode = GAMEREADY;
                         break;
                     default:
@@ -2040,7 +2114,7 @@ void RenderScene(void) {
         
     }
     else if(mode == GAMERANKING) {
-        
+        ShowRANK();
     }
     glutSwapBuffers();
     glFlush();
