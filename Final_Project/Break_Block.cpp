@@ -3,6 +3,9 @@
 #include <cmath>
 #include <random>
 #include <ctime>
+#include <string>
+
+using namespace std;
 
 #define    PI               M_PI
 #define    WIDTH            1000
@@ -129,7 +132,7 @@ struct Vector {
 
     // 벡터 정규화
     void normalize() {
-        float length = std::sqrt(x * x + y * y);
+        float length = sqrt(x * x + y * y);
         x /= length;
         y /= length;
     }
@@ -276,7 +279,7 @@ public:
  *  변수 선언부
  */
 /// 가상 공간의 그리기 영역 좌측과 하단을 나타내는 변수
-int left = 0;
+int _left = 0;
 int bottom = 0;
 
 /// 하단의 슬라이딩 바 선언 및 초기화
@@ -356,8 +359,55 @@ Color softBlue = { 0.6, 0.8, 0.95 };
 /*
  *  Bitmap Setting
  */
-/// READ Bitmap
-bool READ[4][5][5] = {
+bool ALPHA[][5][5] = {
+    /// A
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 }
+    },
+    /// B
+    {
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 0 }
+    },
+    /// C
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1 }
+    },
+    /// D
+    {
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 0 }
+    },
+    /// E
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1 }
+    },
+    /// F
+    {
+        { 0, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 }
+    },
     /// G
     {
         { 0, 1, 1, 1, 0 },
@@ -366,13 +416,45 @@ bool READ[4][5][5] = {
         { 1, 0, 0, 0, 1 },
         { 0, 1, 1, 1, 0 }
     },
-    /// A
+    /// H
     {
-        { 0, 1, 1, 1, 0 },
         { 1, 0, 0, 0, 1 },
-        { 1, 0, 1, 1, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 1 },
         { 1, 0, 0, 0, 1 },
         { 1, 0, 0, 0, 1 }
+    },
+    /// I
+    {
+        { 0, 1, 1, 1, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 1, 1, 1, 0 }
+    },
+    /// J
+    {
+        { 0, 0, 0, 1, 0 },
+        { 0, 0, 0, 1, 0 },
+        { 0, 0, 0, 1, 0 },
+        { 0, 0, 0, 1, 0 },
+        { 0, 1, 1, 0, 0 }
+    },
+    /// K
+    {
+        { 1, 0, 0, 1, 1 },
+        { 1, 0, 1, 0, 0 },
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 }
+    },
+    /// L
+    {
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 1, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1 }
     },
     /// M
     {
@@ -382,18 +464,46 @@ bool READ[4][5][5] = {
         { 1, 0, 1, 0, 1 },
         { 1, 0, 0, 0, 1 }
     },
-    /// E
+    /// N
     {
-        { 0, 1, 1, 1, 1 },
+        { 0, 1, 0, 0, 1 },
+        { 1, 0, 1, 0, 1 },
+        { 1, 0, 1, 0, 1 },
+        { 1, 0, 1, 0, 1 },
+        { 1, 0, 0, 1, 0 }
+    },
+    /// O
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 }
+    },
+    /// P
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 0 },
         { 1, 0, 0, 0, 0 },
-        { 1, 0, 1, 1, 1 },
-        { 1, 0, 0, 0, 0 },
-        { 0, 1, 1, 1, 1 }
-    }
-};
-
-/// START Bitmap
-bool START[5][5][5] = {
+        { 1, 0, 0, 0, 0 }
+    },
+    /// Q
+    {
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 0, 1 },
+        { 1, 0, 0, 1, 0 },
+        { 0, 1, 1, 0, 1 }
+    },
+    /// R
+    {
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 1, 0 },
+        { 1, 0, 1, 0, 0 },
+        { 1, 0, 0, 1, 1 }
+    },
     /// S
     {
         { 0, 1, 1, 1, 1 },
@@ -410,65 +520,53 @@ bool START[5][5][5] = {
         { 0, 0, 1, 0, 0 },
         { 0, 0, 1, 0, 0 }
     },
-    /// A
+    /// U
     {
-        { 0, 1, 1, 1, 0 },
         { 1, 0, 0, 0, 1 },
-        { 1, 0, 1, 1, 1 },
         { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 1, 1, 0 }
+    },
+    /// V
+    {
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 0, 1, 0 },
+        { 0, 1, 0, 1, 0 },
+        { 0, 0, 1, 0, 0 }
+    },
+    /// W
+    {
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 1, 0, 1 },
+        { 1, 0, 1, 0, 1 },
+        { 0, 1, 0, 1, 0 }
+    },
+    /// X
+    {
+        { 1, 0, 0, 0, 1 },
+        { 0, 1, 0, 1, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 1, 0, 1, 0 },
         { 1, 0, 0, 0, 1 }
     },
-    /// R
+    /// Y
     {
-        { 1, 1, 1, 1, 0 },
         { 1, 0, 0, 0, 1 },
-        { 1, 0, 1, 1, 0 },
-        { 1, 0, 1, 0, 0 },
-        { 1, 0, 0, 1, 1 }
-    },
-    /// T
-    {
-        { 1, 1, 1, 1, 1 },
-        { 0, 0, 1, 0, 0 },
+        { 0, 1, 0, 1, 0 },
         { 0, 0, 1, 0, 0 },
         { 0, 0, 1, 0, 0 },
         { 0, 0, 1, 0, 0 }
-    }
-};
-
-/// exit Bitmap
-bool EXIT[4][5][5] {
-    /// e
+    },
+    /// Z
     {
-        { 0, 1, 1, 1, 0 },
-        { 1, 0, 0, 0, 1 },
         { 1, 1, 1, 1, 1 },
-        { 1, 0, 0, 0, 0 },
-        { 0, 1, 1, 1, 1 }
-    },
-    /// x
-    {
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 },
-        { 0, 1, 1, 1, 0 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 }
-    },
-    /// i
-    {
-        { 1, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 0, 0, 0 }
-    },
-    /// t
-    {
-        { 1, 0, 0, 0, 0 },
-        { 1, 1, 1, 0, 0 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 0, 0, 0 },
-        { 0, 1, 1, 1, 0 }
+        { 0, 0, 0, 1, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 1, 0, 0, 0 },
+        { 1, 1, 1, 1, 1 }
     }
 };
 
@@ -479,128 +577,6 @@ bool ARROW[5][5] = {
     { 0, 0, 1, 0, 0 },
     { 0, 1, 0, 0, 0 },
     { 1, 0, 0, 0, 0 }
-};
-
-
-bool PAUSE[5][5][5] = {
-    /// P
-    {
-        { 0, 1, 1, 1, 0 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 1, 1, 0 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 0, 0, 0 }
-    },
-    /// A
-    {
-        { 0, 1, 1, 1, 0 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 1, 1, 1 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 }
-    },
-    /// U
-    {
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 },
-        { 0, 1, 1, 1, 0 }
-    },
-    /// S
-    {
-        { 0, 1, 1, 1, 1 },
-        { 1, 0, 0, 0, 0 },
-        { 0, 1, 1, 1, 0 },
-        { 0, 0, 0, 0, 1 },
-        { 1, 1, 1, 1, 0 }
-    },
-    /// E
-    {
-        { 0, 1, 1, 1, 1 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 1, 1, 1 },
-        { 1, 0, 0, 0, 0 },
-        { 0, 1, 1, 1, 1 }
-    }
-};
-
-bool OVER[4][5][5] = {
-    /// O
-    {
-        { 0, 1, 1, 1, 0 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 },
-        { 0, 1, 1, 1, 0 }
-    },
-    /// V
-    {
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 },
-        { 0, 1, 0, 1, 0 },
-        { 0, 0, 1, 0, 0 }
-    },
-    /// E
-    {
-        { 0, 1, 1, 1, 1 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 1, 1, 1 },
-        { 1, 0, 0, 0, 0 },
-        { 0, 1, 1, 1, 1 }
-    },
-    /// R
-    {
-        { 1, 1, 1, 1, 0 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 1, 1, 0 },
-        { 1, 0, 1, 0, 0 },
-        { 1, 0, 0, 1, 1 }
-    }
-};
-
-bool CLEAR[5][5][5] = {
-    /// C
-    {
-        { 0, 1, 1, 1, 1 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 0, 0, 0 },
-        { 0, 1, 1, 1, 1 }
-    },
-    /// L
-    {
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 1, 1, 1, 1 }
-    },
-    /// E
-    {
-        { 0, 1, 1, 1, 1 },
-        { 1, 0, 0, 0, 0 },
-        { 1, 0, 1, 1, 1 },
-        { 1, 0, 0, 0, 0 },
-        { 0, 1, 1, 1, 1 }
-    },
-    /// A
-    {
-        { 0, 1, 1, 1, 0 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 1, 1, 1 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 }
-    },
-    /// R
-    {
-        { 1, 1, 1, 1, 0 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 1, 1, 0 },
-        { 1, 0, 1, 0, 0 },
-        { 1, 0, 0, 1, 1 }
-    }
 };
 
 /// Bitmap Number Array
@@ -853,7 +829,7 @@ Point MeetPoint(Point a1, Point a2, Point b1, Point b2) {
  */
 /// Sliding Bar Power Hit Mode
 void PowerHit() {
-    //std::cout << powerHitGauge << std::endl;
+    //cout << powerHitGauge << endl;
     if(powerHitCheck) {
         if(powerHitGauge > slidingBar.center.y) {
             slidingBar.center.y += powerHitVariation;
@@ -982,7 +958,7 @@ void CollisionDetectionToWall(Point& ball = ballPosition, Vector& speed = ballSp
                 speed.x = v.x * (speedSum / vSum / 2);
                 speed.y = v.y * (speedSum / vSum / 2);
                 
-                std::cout << i << "벽충돌\n";
+                cout << i << "벽충돌\n";
                 
                 *touch = i;
                 
@@ -1012,7 +988,7 @@ void CollisionDetectionToSlidingBar(Point& ball = ballPosition, Vector& speed = 
     if (*touch != RECTANGLE_BLOCK_NUM + WALL_NUM + 1) {
         float distance = pow(ball.x - (slidingBar.center.x - slidingBarLen / 2), 2) + pow(ball.y - (slidingBar.center.y + slidingBarWeight), 2);
         if(distance <= pow(*radius, 2)) {
-            std::cout << "슬라이딩 바 좌측 상단 충돌" << std::endl;
+            cout << "슬라이딩 바 좌측 상단 충돌" << endl;
             Vector v = { -1.0, 1.0 };
             float vSum = sqrt(v.x * v.x + v.y * v.y);
             
@@ -1026,7 +1002,7 @@ void CollisionDetectionToSlidingBar(Point& ball = ballPosition, Vector& speed = 
         
         distance = pow(ball.x - (slidingBar.center.x + slidingBarLen / 2), 2) + pow(ball.y - (slidingBar.center.y + slidingBarWeight), 2);
         if(distance <= pow(*radius, 2)) {
-            std::cout << "슬라이딩 바 우측 상단 충돌" << std::endl;
+            cout << "슬라이딩 바 우측 상단 충돌" << endl;
             Vector v = { 1.0, 1.0 };
             float vSum = sqrt(v.x * v.x + v.y * v.y);
             
@@ -1060,7 +1036,7 @@ void CollisionDetectionToRectangleBlock() {
             // 좌측 하단
             float distance = pow(ballPosition.x - rectangleBlock[i].leftBottom.x, 2) + pow(ballPosition.y - rectangleBlock[i].leftBottom.y, 2);
             if(distance <= ballRadius * ballRadius) {
-                std::cout << "벽돌 좌측 하단 충돌" << std::endl;
+                cout << "벽돌 좌측 하단 충돌" << endl;
                 Vector v = { -1.0, -1.0 };
                 float vSum = sqrt(v.x * v.x + v.y * v.y);
                                     
@@ -1083,7 +1059,7 @@ void CollisionDetectionToRectangleBlock() {
             // 우측 하단
             distance = pow(ballPosition.x - rectangleBlock[i].rightBottom.x, 2) + pow(ballPosition.y - rectangleBlock[i].rightBottom.y, 2);
             if(distance <= ballRadius * ballRadius) {
-                std::cout << "벽돌 우측 하단 충돌" << std::endl;
+                cout << "벽돌 우측 하단 충돌" << endl;
                 Vector v = { 1.0, -1.0 };
                 float vSum = sqrt(v.x * v.x + v.y * v.y);
                                     
@@ -1106,7 +1082,7 @@ void CollisionDetectionToRectangleBlock() {
             // 우측 상단
             distance = pow(ballPosition.x - rectangleBlock[i].rightTop.x, 2) + pow(ballPosition.y - rectangleBlock[i].rightTop.y, 2);
             if(distance <= ballRadius * ballRadius) {
-                std::cout << "벽돌 우측 상단 충돌" << std::endl;
+                cout << "벽돌 우측 상단 충돌" << endl;
                 Vector v = { 1.0, 1.0 };
                 float vSum = sqrt(v.x * v.x + v.y * v.y);
                                     
@@ -1129,7 +1105,7 @@ void CollisionDetectionToRectangleBlock() {
             // 좌측 상단
             distance = pow(ballPosition.x - rectangleBlock[i].leftTop.x, 2) + pow(ballPosition.y - rectangleBlock[i].leftTop.y, 2);
             if(distance <= ballRadius * ballRadius) {
-                std::cout << "벽돌 좌측 상단 충돌" << std::endl;
+                cout << "벽돌 좌측 상단 충돌" << endl;
                 Vector v = { -1.0, 1.0 };
                 float vSum = sqrt(v.x * v.x + v.y * v.y);
                                     
@@ -1193,7 +1169,7 @@ void CollisionDetectionToCopyBall() {
                 // 좌측 하단
                 float distance = pow(copyball[j]->ballPosition.x - rectangleBlock[i].leftBottom.x, 2) + pow(copyball[j]->ballPosition.y - rectangleBlock[i].leftBottom.y, 2);
                 if(distance <= copyball[j]->ballRadius * copyball[j]->ballRadius) {
-                    std::cout << "벽돌 좌측 하단 충돌" << std::endl;
+                    cout << "벽돌 좌측 하단 충돌" << endl;
                     Vector v = { -1.0, -1.0 };
                     float vSum = sqrt(v.x * v.x + v.y * v.y);
                                         
@@ -1212,7 +1188,7 @@ void CollisionDetectionToCopyBall() {
                 // 우측 하단
                 distance = pow(copyball[j]->ballPosition.x - rectangleBlock[i].rightBottom.x, 2) + pow(copyball[j]->ballPosition.y - rectangleBlock[i].rightBottom.y, 2);
                 if(distance <= copyball[j]->ballRadius * copyball[j]->ballRadius) {
-                    std::cout << "벽돌 우측 하단 충돌" << std::endl;
+                    cout << "벽돌 우측 하단 충돌" << endl;
                     Vector v = { 1.0, -1.0 };
                     float vSum = sqrt(v.x * v.x + v.y * v.y);
                                         
@@ -1230,7 +1206,7 @@ void CollisionDetectionToCopyBall() {
                 // 우측 상단
                 distance = pow(copyball[j]->ballPosition.x - rectangleBlock[i].rightTop.x, 2) + pow(copyball[j]->ballPosition.y - rectangleBlock[i].rightTop.y, 2);
                 if(distance <= copyball[j]->ballRadius * copyball[j]->ballRadius) {
-                    std::cout << "벽돌 우측 상단 충돌" << std::endl;
+                    cout << "벽돌 우측 상단 충돌" << endl;
                     Vector v = { 1.0, 1.0 };
                     float vSum = sqrt(v.x * v.x + v.y * v.y);
                                         
@@ -1248,7 +1224,7 @@ void CollisionDetectionToCopyBall() {
                 // 좌측 상단
                 distance = pow(copyball[j]->ballPosition.x - rectangleBlock[i].leftTop.x, 2) + pow(copyball[j]->ballPosition.y - rectangleBlock[i].leftTop.y, 2);
                 if(distance <= copyball[j]->ballRadius * copyball[j]->ballRadius) {
-                    std::cout << "벽돌 좌측 상단 충돌" << std::endl;
+                    cout << "벽돌 좌측 상단 충돌" << endl;
                     Vector v = { -1.0, 1.0 };
                     float vSum = sqrt(v.x * v.x + v.y * v.y);
                                         
@@ -1302,19 +1278,19 @@ void CollisionDetectionToItem() {
                     rectangleBlock[i].modeState = false;
                     switch (rectangleBlock[i].mode) {
                         case MODE_COPY:
-                            std::cout << "MODE_COPY" << std::endl;
+                            cout << "MODE_COPY" << endl;
                             CreateCopyBall();
                             break;
                         case MODE_SCORE:
-                            std::cout << "MODE_SCORE" << std::endl;
+                            cout << "MODE_SCORE" << endl;
                             score += 100;
                             break;
                         case MODE_SIZEUP:
-                            std::cout << "MODE_SIZEUP" << std::endl;
+                            cout << "MODE_SIZEUP" << endl;
                             ballRadius += ballRadius < 50 ? 4 : 0;
                             break;
                         case MODE_SIZEDOWN:
-                            std::cout << "MODE_SIZEDOWN" << std::endl;
+                            cout << "MODE_SIZEDOWN" << endl;
                             ballRadius -= ballRadius > 5 ? 2 : 0 ;
                             break;
                             
@@ -1533,9 +1509,22 @@ void DrawRectangle(int x, int y, int w) {
     glEnd();
 }
 
+/// 입력 받은 알파벳을 출력하는 함수
+void DrawALPHA(float startX, float startY, int size, char c) {
+    for(int y = 0; y < 5; y ++) {
+        for(int x = 0; x < 5; x ++) {
+            if(ALPHA[c - 'A'][y][x]) {
+                DrawRectangle(x * size + startX , (4 - y) * size + startY, size);
+            }
+        }
+    }
+}
+
+
 /// GAME Bitmap 출력 함수
 void DrawGAME() {
     int size = 32;
+    string str = "GAME";
     for(int index = 0; index < 4; index ++) {
         if(mode == GAMEOVER){
             glColor3f(ColorList[(index + gameoverColor / 10) % 8].red, ColorList[(index + gameoverColor / 10) % 8].green, ColorList[(index + gameoverColor / 10) % 8].blue);
@@ -1543,51 +1532,25 @@ void DrawGAME() {
         else if(mode == GAMECLEAR) {
             glColor3f(ColorList[index].red, ColorList[index].green, ColorList[index].blue);
         }
-        for(int y = 0; y < 5; y ++) {
-            for(int x = 0; x < 5; x ++) {
-                if(READ[index][y][x]) {
-                    DrawRectangle(x * size + 132 + index * (size * 6), (4 - y) * size + 600, size);
-                }
-            }
-        }
+        DrawALPHA(132 + index * (size * 6), 600, size, str.at(index));
     }
 }
 
 /// START Bitmap 출력 함수
 void DrawSTART() {
     int size = 15;
+    string str = "START";
     for(int index = 0; index < 5; index ++) {
-        for(int y = 0; y < 5; y ++) {
-            for(int x = 0; x < 5; x ++) {
-                if(START[index][y][x]) {
-                    DrawRectangle(x * size + 350 + index * (size * 6), (4 - y) * size + 400, size);
-                }
-            }
-        }
+        DrawALPHA(350 + index * (size * 6), 400, size, str.at(index));
     }
 }
 
 /// EXIT Bitmap 출력 함수
 void DrawEXIT() {
     int size = 15;
+    string str = "EXIT";
     for(int index = 0; index < 4; index ++) {
-        if (index == 3) {
-            for(int y = 0; y < 5; y ++) {
-                for(int x = 0; x < 5; x ++) {
-                    if(EXIT[index][y][x]) {
-                        DrawRectangle(x * size + 350 + index * (size * 6) - (size * 4), (4 - y) * size + 250, size);
-                    }
-                }
-            }
-            break;
-        }
-        for(int y = 0; y < 5; y ++) {
-            for(int x = 0; x < 5; x ++) {
-                if(EXIT[index][y][x]) {
-                    DrawRectangle(x * size + 350 + index * (size * 6), (4 - y) * size + 250, size);
-                }
-            }
-        }
+        DrawALPHA(350 + index * (size * 6), 250, size, str.at(index));
     }
 }
 
@@ -1606,31 +1569,21 @@ void DrawARROW() {
 /// PAUSE Bitmap 출력 함수
 void DrawPAUSE() {
     int size = 20;
+    string str = "PAUSE";
     for(int index = 0; index < 5; index ++) {
-        for(int y = 0; y < 5; y ++) {
-            for(int x = 0; x < 5; x ++) {
-                if(PAUSE[index][y][x]) {
-                    DrawRectangle(x * size + 210 + index * (size * 6), (4 - y) * size + 400, size);
-                }
-            }
-        }
+        DrawALPHA(210 + index * (size * 6), 400, size, str.at(index));
     }
 }
 
 /// OVER Bitmap 출력 함수
 void DrawOVER() {
     int size = 32;
+    string str = "OVER";
     for(int index = 0; index < 4; index ++) {
         if(mode == GAMEOVER){
             glColor3f(ColorList[(index + 4 + gameoverColor / 10) % 8].red, ColorList[(index + 4 + gameoverColor / 10) % 8].green, ColorList[(index + 4 + gameoverColor / 10) % 8].blue);
         }
-        for(int y = 0; y < 5; y ++) {
-            for(int x = 0; x < 5; x ++) {
-                if(OVER[index][y][x]) {
-                    DrawRectangle(x * size + 132 + index * (size * 6), (4 - y) * size + 300, size);
-                }
-            }
-        }
+        DrawALPHA(132 + index * (size * 6), 300, size, str.at(index));
     }
 
 }
@@ -1638,15 +1591,10 @@ void DrawOVER() {
 /// CLEAR Bitmap 출력 함수
 void DrawCLEAR() {
     int size = 25;
+    string str = "CLEAR";
     for(int index = 0; index < 5; index ++) {
         glColor3f(ColorList[index + 4].red, ColorList[index + 4].green, ColorList[index + 4].blue);
-        for(int y = 0; y < 5; y ++) {
-            for(int x = 0; x < 5; x ++) {
-                if(CLEAR[index][y][x]) {
-                    DrawRectangle(x * size + 137 + index * (size * 6), (4 - y) * size + 400, size);
-                }
-            }
-        }
+        DrawALPHA(137 + index * (size * 6), 400, size, str.at(index));
     }
 }
 
@@ -1706,6 +1654,7 @@ void DrawNumber() {
     
     for(int index = 0; index < 8; index ++) {
         glColor3f(ColorList[index].red, ColorList[index].green, ColorList[index].blue);
+        
         for(int y = 0; y < 5; y ++) {
             for(int x = 0; x < 5; x ++) {
                 if(NUMBER[num[index]][y][x]) {
@@ -1871,7 +1820,7 @@ void MyReshape(int w, int h) {
     glViewport((w - WIDTH) / 2, (h - HEIGHT) / 2, WIDTH, HEIGHT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(left, left + WIDTH, bottom, bottom + HEIGHT);
+    gluOrtho2D(_left, _left + WIDTH, bottom, bottom + HEIGHT);
 }
 
 /// Window 화면을 출력할 때 실행되는 콜백함수
