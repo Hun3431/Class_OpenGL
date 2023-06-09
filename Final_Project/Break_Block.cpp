@@ -1002,43 +1002,43 @@ void CollisionDetectionToCorner(Point& ball = ballPosition, Vector& speed = ball
 
 
 /// 슬라이딩바와 충돌을 확인하는 함수
-void CollisionDetectionToSlidingBar() {
-    if (beforeTouch != RECTANGLE_BLOCK_NUM + WALL_NUM + 1) {
-        float distance = pow(ballPosition.x - (slidingBar.center.x - slidingBarLen / 2), 2) + pow(ballPosition.y - (slidingBar.center.y + slidingBarWeight), 2);
-        if(distance <= ballRadius * ballRadius) {
+void CollisionDetectionToSlidingBar(Point& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch) {
+    if (*touch != RECTANGLE_BLOCK_NUM + WALL_NUM + 1) {
+        float distance = pow(ball.x - (slidingBar.center.x - slidingBarLen / 2), 2) + pow(ball.y - (slidingBar.center.y + slidingBarWeight), 2);
+        if(distance <= pow(*radius, 2)) {
             std::cout << "슬라이딩 바 좌측 상단 충돌" << std::endl;
             Vector v = { -1.0, 1.0 };
             float vSum = sqrt(v.x * v.x + v.y * v.y);
             
-            ballSpeed.x = v.x * (speedSum / vSum / 2);
-            ballSpeed.y = v.y * (speedSum / vSum / 2);
+            speed.x = v.x * (speedSum / vSum / 2);
+            speed.y = v.y * (speedSum / vSum / 2);
             
-            beforeTouch = RECTANGLE_BLOCK_NUM + WALL_NUM + 1;
+            *touch = RECTANGLE_BLOCK_NUM + WALL_NUM + 1;
             
             return;
         }
         
-        distance = pow(ballPosition.x - (slidingBar.center.x + slidingBarLen / 2), 2) + pow(ballPosition.y - (slidingBar.center.y + slidingBarWeight), 2);
-        if(distance <= ballRadius * ballRadius) {
+        distance = pow(ball.x - (slidingBar.center.x + slidingBarLen / 2), 2) + pow(ball.y - (slidingBar.center.y + slidingBarWeight), 2);
+        if(distance <= pow(*radius, 2)) {
             std::cout << "슬라이딩 바 우측 상단 충돌" << std::endl;
             Vector v = { 1.0, 1.0 };
             float vSum = sqrt(v.x * v.x + v.y * v.y);
             
-            ballSpeed.x = v.x * (speedSum / vSum / 2);
-            ballSpeed.y = v.y * (speedSum / vSum / 2);
+            speed.x = v.x * (speedSum / vSum / 2);
+            speed.y = v.y * (speedSum / vSum / 2);
             
-            beforeTouch = RECTANGLE_BLOCK_NUM + WALL_NUM + 1;
+            *touch = RECTANGLE_BLOCK_NUM + WALL_NUM + 1;
             
             return;
         }
         
-        if(ballPosition.y - ballRadius < slidingBar.center.y + slidingBar.weight) {
-            if(ballPosition.x < slidingBar.center.x + slidingBarLen / 2 && ballPosition.x > slidingBar.center.x - slidingBarLen / 2){
+        if(ball.y - *radius < slidingBar.center.y + slidingBar.weight) {
+            if(ball.x < slidingBar.center.x + slidingBarLen / 2 && ball.x > slidingBar.center.x - slidingBarLen / 2){
                 if(powerHitCheck) {
                     powerShut = true;
                 }
-                ballSpeed.y *= -1;
-                beforeTouch = RECTANGLE_BLOCK_NUM + WALL_NUM + 1;
+                speed.y *= -1;
+                *touch = RECTANGLE_BLOCK_NUM + WALL_NUM + 1;
             }
         }
     }
@@ -1867,6 +1867,7 @@ void RenderScene(void) {
             if (copyball[i]->state) {
                 CollisionDetectionToCorner(copyball[i]->ballPosition, copyball[i]->ballSpeed, &copyball[i]->ballRadius, &copyball[i]->beforeTouch);
                 CollisionDetectionToWall(copyball[i]->ballPosition, copyball[i]->ballSpeed, &copyball[i]->ballRadius, &copyball[i]->beforeTouch);
+                CollisionDetectionToSlidingBar(copyball[i]->ballPosition, copyball[i]->ballSpeed, &copyball[i]->ballRadius, &copyball[i]->beforeTouch);
             }
         }
         
