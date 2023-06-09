@@ -145,13 +145,18 @@ struct Vector {
         Vector reflection = *this - (normal * (2.0f * dotProduct));
         return reflection;
     }
-
-    // 벡터 뺄셈 연산자 오버로딩
+    
+    // 벡터 덧셈
+    Vector operator+(const Vector& other) const {
+        return Vector(x + other.x, y + other.y);
+    }
+    
+    // 벡터 뺄셈
     Vector operator-(const Vector& other) const {
         return Vector(x - other.x, y - other.y);
     }
 
-    // 스칼라 곱 연산자 오버로딩
+    // 스칼라 곱
     Vector operator*(float scalar) const {
         return Vector(x * scalar, y * scalar);
     }
@@ -947,11 +952,7 @@ void CollisionDetectionToWall(Point& ball = ballPosition, Vector& speed = ballSp
                     distance = PointToLineDistance(ball, Wall[i], Wall[i + 1]);
                 }
             }
-            printf("%d : %f  | ", i, distance);
-            std::cout << ball.x << " " << ball.y << " | " << Wall[i].x << " | " << Wall[i + 1].x << std::endl;
             if (distance <= *radius && *touch != i){
-                
-                
                 // 공이 충돌해서 벽을 넘어간 경우 벽에 넘어가기 직전으로(다여있는 곳으로) 이동
                 Point before = { ball.x - speed.x, ball.y - speed.y };
                 Point meet = MeetPoint(Wall[i], Wall[i + 1], ball, before);
@@ -981,6 +982,20 @@ void CollisionDetectionToWall(Point& ball = ballPosition, Vector& speed = ballSp
                 
                 return;
             }
+        }
+    }
+}
+
+/// 벽면 모서리와의 충돌을 확인하는 함수
+void CollisionDetectionToCorner(Point& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch) {
+    for(int i = 1; i < WALL_NUM - 1; i ++) {
+        float distance = (ball.x - Wall[i].x) * (ball.x - Wall[i].x) + (ball.y - Wall[i].y) * (ball.y - Wall[i].y);
+        if(distance <= pow(*radius, 2)) {
+            Vector v = nomalWall[i - 1] + nomalWall[i];
+            float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                
+            speed.x = v.x * (speedSum / vSum / 2);
+            speed.y = v.y * (speedSum / vSum / 2);
         }
     }
 }
@@ -1028,6 +1043,7 @@ void CollisionDetectionToSlidingBar() {
         }
     }
 }
+
 
 /// 직사각형 벽돌과의 충돌을 확인하는 함수
 void CollisionDetectionToRectangleBlock() {
@@ -1131,20 +1147,6 @@ void CollisionDetectionToRectangleBlock() {
                     return;
                 }
             }
-        }
-    }
-}
-
-/// 벽면 모서리와의 충돌을 확인하는 함수
-void CollisionDetectionToCorner() {
-    for(int i = 1; i < WALL_NUM - 1; i ++) {
-        float distance = (ballPosition.x - Wall[i].x) * (ballPosition.x - Wall[i].x) + (ballPosition.y - Wall[i].y) * (ballPosition.y - Wall[i].y);
-        if(distance <= ballRadius * ballRadius) {
-            Vector v = nomalWall[i - 1] - nomalWall[i];
-            float vSum = sqrt(v.x * v.x + v.y * v.y);
-                                
-            ballSpeed.x = v.x * (speedSum / vSum / 2);
-            ballSpeed.y = v.y * (speedSum / vSum / 2);
         }
     }
 }
@@ -1863,7 +1865,7 @@ void RenderScene(void) {
         
         for (int i = 0; i < copycount; i ++) {
             if (copyball[i]->state) {
-                // Point& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch
+                CollisionDetectionToCorner(copyball[i]->ballPosition, copyball[i]->ballSpeed, &copyball[i]->ballRadius, &copyball[i]->beforeTouch);
                 CollisionDetectionToWall(copyball[i]->ballPosition, copyball[i]->ballSpeed, &copyball[i]->ballRadius, &copyball[i]->beforeTouch);
             }
         }
