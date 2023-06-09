@@ -1542,29 +1542,45 @@ void DrawGAME() {
 
 /// START Bitmap 출력 함수
 void DrawSTART() {
-    int size = 15;
+    int size = 10;
     string str = "START";
     for(int index = 0; index < 5; index ++) {
-        DrawALPHA(350 + index * (size * 6), 400, size, str.at(index));
+        DrawALPHA(400 + index * (size * 6), 500, size, str.at(index));
+    }
+}
+
+void DrawHELP() {
+    int size = 10;
+    string str = "HELP";
+    for(int index = 0; index < 4; index ++) {
+        DrawALPHA(400 + index * (size * 6), 400, size, str.at(index));
+    }
+}
+
+void DrawRANK() {
+    int size = 10;
+    string str = "RANK";
+    for(int index = 0; index < 4; index ++) {
+        DrawALPHA(400 + index * (size * 6), 300, size, str.at(index));
     }
 }
 
 /// EXIT Bitmap 출력 함수
 void DrawEXIT() {
-    int size = 15;
+    int size = 10;
     string str = "EXIT";
     for(int index = 0; index < 4; index ++) {
-        DrawALPHA(350 + index * (size * 6), 250, size, str.at(index));
+        DrawALPHA(400 + index * (size * 6), 200, size, str.at(index));
     }
 }
 
 /// ARROW Bitmap 출력 함수
 void DrawARROW() {
-    int size = 15;
+    int size = 10;
     for(int y = 0; y < 5; y ++) {
         for(int x = 0; x < 5; x ++) {
             if(ARROW[y][x]) {
-                DrawRectangle(x * size + 260, (4 - y) * size + 400 - (150 * arrownum), size);
+                DrawRectangle(x * size + 300, (4 - y) * size + 500 - (100 * arrownum), size);
             }
         }
     }
@@ -1702,11 +1718,17 @@ void ShowREADY(){
     DrawSpace();
     glColor3f(softYellow.red,softYellow.green,softYellow.blue);
     DrawGAME();
-    if(arrownum) glColor3f(softWhite.red, softWhite.green, softWhite.blue);
-    else glColor3f(softGreen.red, softGreen.green, softGreen.blue);
+    if(arrownum != 0) glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    else glColor3f(softRed.red, softRed.green, softRed.blue);
     DrawSTART();
-    if(!arrownum) glColor3f(softWhite.red, softWhite.green, softWhite.blue);
-    else glColor3f(softGreen.red, softGreen.green, softGreen.blue);
+    if(arrownum != 1) glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    else glColor3f(softRed.red, softRed.green, softRed.blue);
+    DrawHELP();
+    if(arrownum != 2) glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    else glColor3f(softRed.red, softRed.green, softRed.blue);
+    DrawRANK();
+    if(arrownum != 3) glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    else glColor3f(softRed.red, softRed.green, softRed.blue);
     DrawEXIT();
     glColor3f(softRed.red, softRed.green, softRed.blue);
     DrawARROW();
@@ -1776,7 +1798,6 @@ void MySpecialKey(int key, int x, int y) {
             case GLUT_KEY_UP:
                 ballPosition.y += 5;
                 break;
-                
             case GLUT_KEY_DOWN:
                 ballPosition.y -= 5;
                 break;
@@ -1815,11 +1836,22 @@ void MySpecialKey(int key, int x, int y) {
             case 32:
                 switch (mode) {
                     case GAMEREADY:
-                        if (arrownum) {
-                            exit(0);
-                        }
-                        else {
-                            mode = GAMERUN;
+                        switch (arrownum) {
+                            case 0:
+                                mode = GAMERUN;
+                                break;
+                            case 1:
+                                mode = GAMEHELP;
+                                break;
+                            case 2:
+                                mode = GAMERANKING;
+                                break;
+                            case 3:
+                                exit(0);
+                                break;
+                                
+                            default:
+                                break;
                         }
                         break;
                     case GAMERUN:
@@ -1861,7 +1893,7 @@ void MySpecialKey(int key, int x, int y) {
             case GLUT_KEY_UP:
                 switch (mode) {
                     case GAMEREADY:
-                        arrownum = arrownum ? 0 : 1;
+                        arrownum += arrownum - 1 < 0 ? 3 : - 1;
                         break;
                     case GAMERUN:
                         startY += startY < 100 ? + 1 : 0;
@@ -1871,7 +1903,7 @@ void MySpecialKey(int key, int x, int y) {
             case GLUT_KEY_DOWN:
                 switch (mode) {
                     case GAMEREADY:
-                        arrownum = arrownum ? 0 : 1;
+                        arrownum = ++arrownum % 4;
                         break;
                     case GAMERUN:
                         startY += startY > 20 ? - 1 : 0;
