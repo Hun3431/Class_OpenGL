@@ -28,6 +28,8 @@
 #define    GAMEOVER         2
 #define    GAMECLEAR        3
 
+bool debug = false;
+
 /*
  *  구조체 선언부
  */
@@ -770,9 +772,9 @@ void CreateRectangleBlock() {
         rectangleBlock[i].rightBottom.x = startX + xVariation * rectangleBlockLen + rectangleBlockLen;
         rectangleBlock[i].rightBottom.y = startY - rectangleBlockWeight;
         
-        int mode = rand() % 19 - 15;
-        rectangleBlock[i].mode = mode < 1 ? MODE_DEFAULT : mode;
-//        rectangleBlock[i].mode = rand() % 4 + 1;
+//        int mode = rand() % 19 - 15;
+//        rectangleBlock[i].mode = mode < 1 ? MODE_DEFAULT : mode;
+        rectangleBlock[i].mode = rand() % 4 + 1;
         
         rectangleBlock[i].state = rand() % 3 + 1;
     }
@@ -879,6 +881,7 @@ void CollisionDetectionToWindow() {
         ballSpeed.y *= -1;
     }
 }
+
 
 /// 내부 벽과의 충돌을 확인하는 함수
 void CollisionDetectionToWall(void){
@@ -1712,7 +1715,6 @@ void DrawTimer() {
             }
         }
     }
-    if(start && pause && mode == GAMERUN) runtime ++;
 }
 
 void DrawScore() {
@@ -1732,7 +1734,7 @@ void DrawScore() {
         for(int y = 0; y < 5; y ++) {
             for(int x = 0; x < 5; x ++) {
                 if(NUMBER[num[index]][y][x]) {
-                    DrawRectangle(x * size + 100 + index * (size * 6), (4 - y) * size + 900, size);
+                    DrawRectangle(x * size + 50 + index * (size * 6), (4 - y) * size + 900, size);
                 }
             }
         }
@@ -1793,89 +1795,114 @@ void ShowCLEAR() {
  */
 /// 스페셜 키가 입력되면 실행되는 콜백함수
 void MySpecialKey(int key, int x, int y) {
-    switch (key) {
-        case GLUT_KEY_LEFT:
-            if(!start) {
-                startX += startX < 180 ? + 1 : 0;
-            }
-            else if(pause) {
-                slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
-            }
-            break;
-        case GLUT_KEY_RIGHT:
-            if(!start) {
-                startX += startX > 0 ? - 1 : 0;
-            }
-            else if(pause) {
-                slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
-            }
-            break;
-        // 스페이스바
-        case 32:
-            switch (mode) {
-                case GAMEREADY:
-                    if (arrownum) {
+    if (debug) {
+        switch (key) {
+            case GLUT_KEY_UP:
+                ballPosition.y += 5;
+                break;
+                
+            case GLUT_KEY_DOWN:
+                ballPosition.y -= 5;
+                break;
+            case GLUT_KEY_LEFT:
+                ballPosition.x -= 5;
+                break;
+            case GLUT_KEY_RIGHT:
+                ballPosition.x += 5;
+                break;
+            case GLUT_KEY_PAGE_UP:
+                debug = !debug;
+                break;
+            default:
+                break;
+        }
+    }
+    else {
+        switch (key) {
+            case GLUT_KEY_LEFT:
+                if(!start) {
+                    startX += startX < 180 ? + 1 : 0;
+                }
+                else if(pause) {
+                    slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
+                }
+                break;
+            case GLUT_KEY_RIGHT:
+                if(!start) {
+                    startX += startX > 0 ? - 1 : 0;
+                }
+                else if(pause) {
+                    slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
+                }
+                break;
+                // 스페이스바
+            case 32:
+                switch (mode) {
+                    case GAMEREADY:
+                        if (arrownum) {
+                            exit(0);
+                        }
+                        else {
+                            mode = GAMERUN;
+                        }
+                        break;
+                    case GAMERUN:
+                        if(!start && startX != 90) {
+                            float delta = 2 * PI / 360;
+                            start = !start;
+                            ballSpeed.x = (startY / 20) * cos(delta * startX);
+                            
+                            ballSpeed.y = (startY / 20) * sin(delta * startX);
+                        }
+                        else if (start && powerHitGauge > 30){
+                            powerHitCheck = true;
+                            powerHitVariation = powerHitGauge / 20;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                break;
+                // 게임 일시정지
+            case 27:
+                switch (mode) {
+                    case GAMERUN:
+                        pause = pause ? false : true;
+                        break;
+                    case GAMECLEAR:
                         exit(0);
-                    }
-                    else {
-                        mode = GAMERUN;
-                    }
-                    break;
-                case GAMERUN:
-                    if(!start && startX != 90) {
-                        float delta = 2 * PI / 360;
-                        start = !start;
-                        ballSpeed.x = (startY / 20) * cos(delta * startX);
-                        
-                        ballSpeed.y = (startY / 20) * sin(delta * startX);
-                    }
-                    else if (start && powerHitGauge > 30){
-                        powerHitCheck = true;
-                        powerHitVariation = powerHitGauge / 20;
-                    }
-                    break;
-                default:
-                    break;
-            }
-            break;
-        // 게임 일시정지
-        case 27:
-            switch (mode) {
-                case GAMERUN:
-                    pause = pause ? false : true;
-                    break;
-                case GAMECLEAR:
-                    exit(0);
-                    break;
-                case GAMEOVER:
-                    exit(0);
-                default:
-                    break;
-            }
-            break;
-        case GLUT_KEY_UP:
-            switch (mode) {
-                case GAMEREADY:
-                    arrownum = arrownum ? 0 : 1;
-                    break;
-                case GAMERUN:
-                    startY += startY < 100 ? + 1 : 0;
-                    break;
-            }
-            break;
-        case GLUT_KEY_DOWN:
-            switch (mode) {
-                case GAMEREADY:
-                    arrownum = arrownum ? 0 : 1;
-                    break;
-                case GAMERUN:
-                    startY += startY > 20 ? - 1 : 0;
-                    break;
-            }
-            break;
-        
-        default:
-            break;
+                        break;
+                    case GAMEOVER:
+                        exit(0);
+                    default:
+                        break;
+                }
+                break;
+            case GLUT_KEY_UP:
+                switch (mode) {
+                    case GAMEREADY:
+                        arrownum = arrownum ? 0 : 1;
+                        break;
+                    case GAMERUN:
+                        startY += startY < 100 ? + 1 : 0;
+                        break;
+                }
+                break;
+            case GLUT_KEY_DOWN:
+                switch (mode) {
+                    case GAMEREADY:
+                        arrownum = arrownum ? 0 : 1;
+                        break;
+                    case GAMERUN:
+                        startY += startY > 20 ? - 1 : 0;
+                        break;
+                }
+                break;
+            case GLUT_KEY_PAGE_UP:
+                debug = !debug;
+            default:
+                break;
+        }
     }
     glutPostRedisplay();
 }
@@ -1935,14 +1962,21 @@ void RenderScene(void) {
         ShowLife();
         DrawTimer();
         DrawScore();
-        if(CountBlock() && pause && start) {
-            // 공의 위치 결정
-            ChangeSpeed(1);
-            ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
-            ballPosition.y += ballSpeed.y;
+        
+        if(debug){
+            
+        }
+        else {
+            if(CountBlock() && pause && start) {
+                // 공의 위치 결정
+                ChangeSpeed(1);
+                ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
+                ballPosition.y += ballSpeed.y;
 
-            for(int i = 0; i < copycount; i ++) {
-                copyball[i]->ChangePosition();
+                for(int i = 0; i < copycount; i ++) {
+                    copyball[i]->ChangePosition();
+                }
+                runtime++;
             }
         }
         
