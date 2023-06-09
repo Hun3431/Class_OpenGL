@@ -291,6 +291,7 @@ float powerHitMax = 50;
 float powerHitGauge = powerHitMax;
 float powerHitVariation;
 bool powerShut = false;
+bool powerMode = false;
 
 /// 공 선언 및 초기화
 float ballRadius = 10.0;
@@ -859,12 +860,12 @@ void PowerHit() {
         }
         else {
             powerShut = false;
-            ChangeSpeed(1.2);
             speedY *= speedY < 0 ? -1 : 1;
             powerHitCheck = false;
             powerHitGauge = 0;
         }
     }
+    // Power Hit가 끝나고 게이지가 채워지는 과정
     else {
         if(slidingBar.center.y > 0) {
             slidingBar.center.y -= powerHitVariation;
@@ -1041,6 +1042,7 @@ void CollisionDetectionToSlidingBar(Point& ball = ballPosition, Vector& speed = 
             if(ball.x < slidingBar.center.x + slidingBarLen / 2 && ball.x > slidingBar.center.x - slidingBarLen / 2){
                 if(powerHitCheck) {
                     powerShut = true;
+                    powerMode = true;
                 }
                 speed.y *= -1;
                 *touch = RECTANGLE_BLOCK_NUM + WALL_NUM + 1;
@@ -1065,7 +1067,11 @@ void CollisionDetectionToRectangleBlock() {
                 ballSpeed.x = v.x * (speedSum / vSum / 2);
                 ballSpeed.y = v.y * (speedSum / vSum / 2);
                 
-                rectangleBlock[i].state --;
+                if (powerMode) {
+                    rectangleBlock[i].state = 0;
+                    powerMode = false;
+                }
+                else rectangleBlock[i].state --;
                 
                 if(!rectangleBlock[i].state) score += 50;
                 
@@ -1084,7 +1090,12 @@ void CollisionDetectionToRectangleBlock() {
                 ballSpeed.x = v.x * (speedSum / vSum / 2);
                 ballSpeed.y = v.y * (speedSum / vSum / 2);
                 
-                rectangleBlock[i].state --;
+                if (powerMode) {
+                    rectangleBlock[i].state = 0;
+                    powerMode = false;
+                }
+                else rectangleBlock[i].state --;
+                
                 if(!rectangleBlock[i].state) score += 50;
                 
                 beforeTouch = i + WALL_NUM;
@@ -1102,7 +1113,12 @@ void CollisionDetectionToRectangleBlock() {
                 ballSpeed.x = v.x * (speedSum / vSum / 2);
                 ballSpeed.y = v.y * (speedSum / vSum / 2);
                 
-                rectangleBlock[i].state --;
+                if (powerMode) {
+                    rectangleBlock[i].state = 0;
+                    powerMode = false;
+                }
+                else rectangleBlock[i].state --;
+                
                 if(!rectangleBlock[i].state) score += 50;
                 
                 beforeTouch = i + WALL_NUM;
@@ -1120,7 +1136,13 @@ void CollisionDetectionToRectangleBlock() {
                 ballSpeed.x = v.x * (speedSum / vSum / 2);
                 ballSpeed.y = v.y * (speedSum / vSum / 2);
                 
-                rectangleBlock[i].state --;
+                
+                if (powerMode) {
+                    rectangleBlock[i].state = 0;
+                    powerMode = false;
+                }
+                else rectangleBlock[i].state --;
+                
                 if(!rectangleBlock[i].state) score += 50;
                 
                 beforeTouch = i + WALL_NUM;
@@ -1132,7 +1154,12 @@ void CollisionDetectionToRectangleBlock() {
             if(ballPosition.y + ballRadius >= rectangleBlock[i].leftBottom.y && ballPosition.y - ballRadius <= rectangleBlock[i].leftTop.y) {
                 if(ballPosition.x + ballRadius >= rectangleBlock[i].leftBottom.x && ballPosition.x - ballRadius <= rectangleBlock[i].rightBottom.x){
                     
-                    rectangleBlock[i].state --;
+                    if (powerMode) {
+                        rectangleBlock[i].state = 0;
+                        powerMode = false;
+                    }
+                    else rectangleBlock[i].state --;
+                    
                     if(!rectangleBlock[i].state) score += 50;
                     
                     Point _block;
@@ -1885,7 +1912,9 @@ void RenderScene(void) {
         }
         
         // 요소 출력
-        glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+        if(powerMode) glColor3f(softRed.red, softRed.green, softRed.blue);
+        else glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+        
         if(start) {
             ShowBall();
         }
@@ -1912,9 +1941,14 @@ void RenderScene(void) {
             if(CountBlock() && pause && start) {
                 // 공의 위치 결정
                 ChangeSpeed(1);
-                ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
-                ballPosition.y += ballSpeed.y;
-
+                if(powerMode) {
+                    ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
+                    ballPosition.y += ballSpeed.y * 3;
+                }
+                else {
+                    ballPosition.x += powerShut ? 0.0 : ballSpeed.x;
+                    ballPosition.y += ballSpeed.y;
+                }
                 for(int i = 0; i < copycount; i ++) {
                     copyball[i]->ChangePosition();
                 }
