@@ -883,13 +883,18 @@ void PowerHit() {
  *  CollisionDetection Function
  */
 /// 외부 벽과의 충돌을 확인하는 함수
-void CollisionDetectionToWindow() {
-    ballSpeed.x *= ballPosition.x + ballRadius >= WIDTH ? -1 : 1;
-    ballSpeed.x *= ballPosition.x - ballRadius <= 0 ? -1 : 1;
-    ballSpeed.y *= ballPosition.y + ballRadius >= HEIGHT ? -1 : 1;
-    if(ballPosition.y - ballRadius <= 0) {
-        life --;
-        ballSpeed.y *= -1;
+void CollisionDetectionToWindow(Point& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch, bool* state = nullptr) {
+    speed.x *= ball.x + *radius >= WIDTH ? -1 : 1;
+    speed.x *= ball.x - *radius <= 0 ? -1 : 1;
+    speed.y *= ball.y + *radius >= HEIGHT ? -1 : 1;
+    if(ball.y - *radius <= 0) {
+        if(state != nullptr) {
+            *state = false;
+        }
+        else {
+            life --;
+            speed.y *= -1;
+        }
     }
 }
 
@@ -1863,8 +1868,10 @@ void RenderScene(void) {
         CollisionDetectionToItem();
         CollisionDetectionToCopyBall();
         
+        // 복사공 충돌 검증
         for (int i = 0; i < copycount; i ++) {
             if (copyball[i]->state) {
+                CollisionDetectionToWindow(copyball[i]->ballPosition, copyball[i]->ballSpeed, &copyball[i]->ballRadius, &copyball[i]->beforeTouch, &copyball[i]->state);
                 CollisionDetectionToCorner(copyball[i]->ballPosition, copyball[i]->ballSpeed, &copyball[i]->ballRadius, &copyball[i]->beforeTouch);
                 CollisionDetectionToWall(copyball[i]->ballPosition, copyball[i]->ballSpeed, &copyball[i]->ballRadius, &copyball[i]->beforeTouch);
                 CollisionDetectionToSlidingBar(copyball[i]->ballPosition, copyball[i]->ballSpeed, &copyball[i]->ballRadius, &copyball[i]->beforeTouch);
