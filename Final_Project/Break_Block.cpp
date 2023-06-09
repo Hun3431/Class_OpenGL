@@ -1861,6 +1861,13 @@ void RenderScene(void) {
         CollisionDetectionToItem();
         CollisionDetectionToCopyBall();
         
+        for (int i = 0; i < copycount; i ++) {
+            if (copyball[i]->state) {
+                // Point& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch
+                CollisionDetectionToWall(copyball[i]->ballPosition, copyball[i]->ballSpeed, &copyball[i]->ballRadius, &copyball[i]->beforeTouch);
+            }
+        }
+        
         if(start) {
             for(int i = 0; i < copycount; i ++) {
                 copyball[i]->Show();
