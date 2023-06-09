@@ -807,7 +807,13 @@ float return_X(float y, Point a1, Point a2) {
 
 /// 두 점과 x 값을 넣으면 y 값을 반환해주는 함수
 float return_Y(float x, Point a1, Point a2) {
-    return inclination(a1, a2) * x - a1.x + a1.y;
+    float m = inclination(a1, a2);
+    if (a2.x - a1.x != 0) {
+        return m * x - m * a1.x + a1.y;
+    } else {
+        // x 값이 두 점의 x 좌표와 동일한 경우, 해당 x 값에 대응하는 y 값을 직접 반환
+        return a1.y;
+    }
 }
 
 /// 벽돌의 갯수를 반환하는 함수
@@ -883,183 +889,102 @@ void CollisionDetectionToWindow() {
 }
 
 
-/// 내부 벽과의 충돌을 확인하는 함수
-void CollisionDetectionToWall(void){
+
+/// 점과 직선 사이의 거리를 구하는 함수
+/// d = |Ax + By + C| / sqrt(A^2 + B^2)
+float PointToLineDistance(Point p, Point w1, Point w2) {
+    float A = inclination(w1, w2); // 기울기
+    float B = -1.0f;
+    float C = return_Y(0, w1, w2); // Y 절편
+    
+    return abs(A * p.x + B * p.y + C) / sqrt(A * A + B * B);
+}
+
+/// 점과 점 사이의 거리를 구하는 함수
+float PointToPointDistance(Point a, Point b) {
+    return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+}
+
+
+/// 내부 벽과 충돌을 확인하는 함수(방법 번경)
+void CollisionDetectionToWall(Point& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch) {
+    
     for(int i = 0; i < WALL_NUM - 1; i ++) {
-        /// 좌측 기울기가 - 인 대각선
-        if(i == 1 && i != beforeTouch) {
-            if (Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
-                if (return_X(ballPosition.y, Wall[i], Wall[i+1]) >= ballPosition.x - ballRadius) {
-                    // 공 위치 조정(벽을 넘어가지 않도록)
-                    Point before = { ballPosition.x - ballSpeed.x, ballPosition.y - ballSpeed.y };
-                    Point meet = MeetPoint(Wall[i], Wall[i + 1], ballPosition, before);
-                    float angle = atan(ballSpeed.y / ballSpeed.x);
-                    
-                    std::cout << "좌하단" << std::endl;
-                    
-                    ballPosition.x = meet.x + abs(ballRadius * cos(angle));
-                    ballPosition.y = meet.y + abs(ballRadius * sin(angle));
-                    
-                    // 벡터의 정규화
-                    ballSpeed.normalize();
-                    nomalWall[i].normalize();
-
-                    // 반사 벡터 계산
-                    Vector v = ballSpeed.reflect(nomalWall[i]);
-                    float vSum = sqrt(v.x * v.x + v.y * v.y);
-                                        
-                    ballSpeed.x = v.x * (speedSum / vSum / 2);
-                    ballSpeed.y = v.y * (speedSum / vSum / 2);
-                    
-                    beforeTouch = i;
-                    
-                    return;
-                }
+        // 벽 y 좌표상의 위아래를 나눠주는 조건문
+        float top, bottom;
+        if(Wall[i].y > Wall[i + 1].y) {
+            top = Wall[i].y;
+            bottom = Wall[i + 1].y;
+        }
+        else {
+            top = Wall[i + 1].y;
+            bottom = Wall[i].y;
+        }
+        
+        float distance;
+        bool check = false;
+        
+        // 벽의 y가 같은 경우 예외처리 x축에 평행한 벽
+        if(i == 2 || i == 5) {
+            distance = abs(Wall[i].y - ball.y);
+            float l = (Wall[i].x < Wall[i + 1].x) ? Wall[i].x : Wall[i + 1].x;
+            float r = (Wall[i].x < Wall[i + 1].x) ? Wall[i + 1].x : Wall[i].x;
+            
+            if(l <= ball.x && r >= ball.x) {
+                check = true;
             }
         }
-        /// 상단 기울기가 - 인 대각선
-        else if(i == 4 && i != beforeTouch) {
-            if (Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
-                if (return_X(ballPosition.y, Wall[i], Wall[i+1]) <= ballPosition.x + ballRadius) {
-                    // 공 위치 조정(벽을 넘어가지 않도록)
-                    Point before = { ballPosition.x - ballSpeed.x, ballPosition.y - ballSpeed.y };
-                    Point meet = MeetPoint(Wall[i], Wall[i + 1], ballPosition, before);
-                    float angle = atan(ballSpeed.y / ballSpeed.x);
-                    
-                    std::cout << "우상단" << std::endl;
-                    
-                    ballPosition.x = meet.x - abs(ballRadius * cos(angle));
-                    ballPosition.y = meet.y - abs(ballRadius * sin(angle));
-                    
-                    // 벡터의 정규화
-                    ballSpeed.normalize();
-                    nomalWall[i].normalize();
-
-                    // 반사 벡터 계산
-                    Vector v = ballSpeed.reflect(nomalWall[i]);
-                    float vSum = sqrt(v.x * v.x + v.y * v.y);
-                                        
-                    ballSpeed.x = v.x * (speedSum / vSum / 2);
-                    ballSpeed.y = v.y * (speedSum / vSum / 2);
-                    
-                    beforeTouch = i;
-                    
-                    return;
+        
+        // 공이 벽 내부의 y값이 넘어가는지 확인하는 조건문
+        if ((bottom <= ball.y && top >= ball.y ) || check) {
+            if(!check) {
+                // 벽의 x가 같은 경우 예외처리 y축에 평행한 벽
+                if(i == 0 || i == 7) {
+                    distance = abs(Wall[i].x - ball.x);
+                }
+                // 대각선 부분 처리
+                else {
+                    distance = PointToLineDistance(ball, Wall[i], Wall[i + 1]);
                 }
             }
-        }
-        /// 상단 기울기가 + 인 대각선
-        else if(i == 3 && i != beforeTouch) {
-            if (Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
-                if (return_X(ballPosition.y, Wall[i], Wall[i+1]) >= ballPosition.x - ballRadius) {
-                    // 공 위치 조정(벽을 넘어가지 않도록)
-                    Point before = { ballPosition.x - ballSpeed.x, ballPosition.y - ballSpeed.y };
-                    Point meet = MeetPoint(Wall[i], Wall[i + 1], ballPosition, before);
-                    float angle = atan(ballSpeed.y / ballSpeed.x);
-                    
-                    std::cout << "좌상단" << std::endl;
-                    
-                    ballPosition.x = meet.x + abs(ballRadius * cos(angle));
-                    ballPosition.y = meet.y - abs(ballRadius * sin(angle));
-                    
-                    // 벡터의 정규화
-                    ballSpeed.normalize();
-                    nomalWall[i].normalize();
-
-                    // 반사 벡터 계산
-                    Vector v = ballSpeed.reflect(nomalWall[i]);
-                    float vSum = sqrt(v.x * v.x + v.y * v.y);
-                                        
-                    ballSpeed.x = v.x * (speedSum / vSum / 2);
-                    ballSpeed.y = v.y * (speedSum / vSum / 2);
-                    
-                    beforeTouch = i;
-                    
-                    return;
-                }
-            }
-        }
-        /// 우측 기울기가 + 인 대각선
-        else if(i == 6 && i != beforeTouch) {
-            if (Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
-                if (return_X(ballPosition.y, Wall[i], Wall[i+1]) <= ballPosition.x + ballRadius) {
-                    // 공 위치 조정(벽을 넘어가지 않도록)
-                    Point before = { ballPosition.x - ballSpeed.x, ballPosition.y - ballSpeed.y };
-                    Point meet = MeetPoint(Wall[i], Wall[i + 1], ballPosition, before);
-                    float angle = atan(ballSpeed.y / ballSpeed.x);
-                    
-                    std::cout << "우하단" << std::endl;
+            printf("%d : %f  | ", i, distance);
+            std::cout << ball.x << " " << ball.y << " | " << Wall[i].x << " | " << Wall[i + 1].x << std::endl;
+            if (distance <= *radius && *touch != i){
                 
-                    ballPosition.x = meet.x - abs(ballRadius * cos(angle));
-                    ballPosition.y = meet.y + abs(ballRadius * sin(angle));
-                    
-                    // 벡터의 정규화
-                    ballSpeed.normalize();
-                    nomalWall[i].normalize();
-
-                    // 반사 벡터 계산
-                    Vector v = ballSpeed.reflect(nomalWall[i]);
-                    float vSum = sqrt(v.x * v.x + v.y * v.y);
-                                        
-                    ballSpeed.x = v.x * (speedSum / vSum / 2);
-                    ballSpeed.y = v.y * (speedSum / vSum / 2);
-                    
-                    beforeTouch = i;
-                    
-                    return;
-                }
-            }
-        }
-        /// 좌측 y 축에 평행한 직선
-        else if(i == 0 && i != beforeTouch) {
-            if(Wall[i].x >= ballPosition.x - ballRadius && Wall[i].y <= ballPosition.y && Wall[i + 1].y >= ballPosition.y) {
-                ballSpeed.x *= -1;
-                ballPosition.x = Wall[i].x + ballRadius + 2;
                 
-                beforeTouch = i;
+                // 공이 충돌해서 벽을 넘어간 경우 벽에 넘어가기 직전으로(다여있는 곳으로) 이동
+                Point before = { ball.x - speed.x, ball.y - speed.y };
+                Point meet = MeetPoint(Wall[i], Wall[i + 1], ball, before);
+                float len = PointToPointDistance(ball, before);
+                float ratio = len / PointToPointDistance(ball, meet);
+                float x = (ball.x - before.x) * ratio;
+                float y = (ball.y - before.y) * ratio;
+                
+                ball.x = before.x + x;
+                ball.y = before.y + y;
+                
+                // 공의 방향 변경
+                // 벡터의 정규화
+                speed.normalize();
+                nomalWall[i].normalize();
+
+                // 반사 벡터 계산
+                Vector v = speed.reflect(nomalWall[i]);
+                float vSum = sqrt(v.x * v.x + v.y * v.y);
+                                    
+                speed.x = v.x * (speedSum / vSum / 2);
+                speed.y = v.y * (speedSum / vSum / 2);
+                
+                std::cout << i << "벽충돌\n";
+                
+                *touch = i;
                 
                 return;
-            }
-        }
-        /// 우측 y 축에 평행한 직선
-        else if(i == 7 && i != beforeTouch) {
-            if(Wall[i].x <= ballPosition.x + ballRadius && Wall[i + 1].y <= ballPosition.y && Wall[i].y >= ballPosition.y) {
-                ballSpeed.x *= -1;
-                ballPosition.x = Wall[i].x - ballRadius - 2;
-                
-                beforeTouch = i;
-                
-                return;
-            }
-        }
-        /// 좌측 x 축에 평행한 직선
-        else if(i == 2 && i != beforeTouch) {
-            if(Wall[i].x <= ballPosition.x + ballRadius && Wall[i + 1].x >= ballPosition.x - ballRadius) {
-                if(Wall[i].y <= ballPosition.y + ballRadius) {
-                    ballSpeed.y *= -1;
-                    ballPosition.y = Wall[i].y - ballRadius - 2;
-                    
-                    beforeTouch = i;
-                    
-                    return;
-                }
-            }
-        }
-        /// 우측 x 축에 평행한 직선
-        else if(i == 5 && i != beforeTouch) {
-            if(Wall[i].x <= ballPosition.x + ballRadius && Wall[i + 1].x >= ballPosition.x - ballRadius) {
-                if(Wall[i].y <= ballPosition.y + ballRadius) {
-                    ballSpeed.y *= -1;
-                    ballPosition.y = Wall[i].y - ballRadius - 2;
-                    
-                    beforeTouch = i;
-                    
-                    return;
-                }
             }
         }
     }
 }
+
 
 /// 슬라이딩바와 충돌을 확인하는 함수
 void CollisionDetectionToSlidingBar() {
