@@ -30,6 +30,8 @@ using namespace std;
 #define    GAMERUN          1
 #define    GAMEOVER         2
 #define    GAMECLEAR        3
+#define    GAMEHELP         4
+#define    GAMERANKING      5
 
 bool debug = false;
 
@@ -329,7 +331,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = GAMEREADY;
+int  mode  = GAMEHELP;
 bool start = false;
 
 const int star_num = 100;
@@ -1511,9 +1513,11 @@ void DrawRectangle(int x, int y, int w) {
 
 /// 입력 받은 알파벳을 출력하는 함수
 void DrawALPHA(float startX, float startY, int size, char c) {
+    if(c > 'Z') c ^= ' ';
+
     for(int y = 0; y < 5; y ++) {
         for(int x = 0; x < 5; x ++) {
-            if(ALPHA[c - 'A'][y][x]) {
+            if(c != ' ' && ALPHA[c - 'A'][y][x]) {
                 DrawRectangle(x * size + startX , (4 - y) * size + startY, size);
             }
         }
@@ -1665,6 +1669,31 @@ void DrawNumber() {
     }
 }
 
+void DrawNUM(float startX, float startY, int size, int num) {
+    for(int y = 0; y < 5; y ++) {
+        for(int x = 0; x < 5; x ++) {
+            if(NUMBER[num][y][x]) {
+                DrawRectangle(x * size + startX, (4 - y) * size + startY, size);
+            }
+        }
+    }
+}
+
+void DrawHelp() {
+    int size = 20;
+    string str = "HELP";
+    for(int index = 0; index < 4; index ++) {
+        glColor3f(softYellow.red, softYellow.green, softYellow.blue);
+        DrawALPHA(270 + index * (size * 6), 800, size, str.at(index));
+    }
+}
+
+void DrawMEMO(float startX, float startY, int size, string str) {
+    for(int index = 0; index < str.length(); index ++) {
+        DrawALPHA(startX + index * (size * 6), startY, size, str.at(index));
+    }
+}
+
 
 /*
  *  GAMEMODE PAGE
@@ -1683,11 +1712,6 @@ void ShowREADY(){
     DrawARROW();
 }
 
-void ShowGAMEOVER() {
-    DrawGAME();
-    DrawOVER();
-}
-
 void ShowCLEAR() {
     for(int i = 0; i < FIRENUM; i ++) {
         fire[i] -> Fire();
@@ -1696,6 +1720,50 @@ void ShowCLEAR() {
     DrawCLEAR();
     DrawTimer();
     ShowLife();
+}
+
+void ShowHELP() {
+    DrawHelp();
+    
+    float startX = 80;
+    float startY = 700;
+    float size = 4;
+    
+    glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    DrawNUM(startX - 40, startY, size, 1);
+    DrawMEMO(startX, startY, size, "Control is possible through the rudder ");
+    DrawMEMO(startX, startY - 40, size, "key and space bar");
+    
+    startY -= 100;
+    DrawNUM(startX - 40, startY, size, 2);
+    DrawMEMO(startX, startY, size, "Initially you can use the rudder to ");
+    DrawMEMO(startX, startY - 40, size, "specify the direction and speed of");
+    DrawMEMO(startX, startY - 80, size, "the ball");
+    
+    startY -= 140;
+    
+    DrawNUM(startX - 40, startY, size, 3);
+    DrawMEMO(startX, startY, size, "You can use the ESC key to stop the");
+    DrawMEMO(startX, startY - 40, size, "game");
+    
+    startY -= 100;
+    DrawNUM(startX - 40, startY, size, 4);
+    DrawMEMO(startX, startY, size, "Press the space bar to hit the ball ");
+    DrawMEMO(startX, startY - 40, size, "and it will be in power mode");
+    DrawMEMO(startX, startY - 80, size, "It is three times as fast as it flies");
+    DrawMEMO(startX, startY - 120, size, "and it destroys all the block at once");
+    
+    startY -= 180;
+    DrawNUM(startX - 40, startY, size, 5);
+    DrawMEMO(startX, startY, size, "If you destroy a block you will get");
+    DrawMEMO(startX, startY - 40, size, "a special item");
+
+    
+    size = 3;
+    startX = 650;
+    startY = 50;
+    glColor3f(softRed.red, softRed.green, softRed.blue);
+    DrawMEMO(startX, startY, size, "Push esc to back");
 }
 
 /*
@@ -1782,6 +1850,10 @@ void MySpecialKey(int key, int x, int y) {
                         break;
                     case GAMEOVER:
                         exit(0);
+                        break;
+                    case GAMEHELP:
+                        mode = GAMEREADY;
+                        break;
                     default:
                         break;
                 }
@@ -1919,7 +1991,8 @@ void RenderScene(void) {
         }
     }
     else if(mode == GAMEOVER) {
-        ShowGAMEOVER();
+        DrawGAME();
+        DrawOVER();
         gameoverColor = gameoverColor == 0 ? 80 : gameoverColor - 1;
         DrawTimer();
         DrawNumber();
@@ -1929,6 +2002,13 @@ void RenderScene(void) {
         ShowCLEAR();
         DrawNumber();
         DrawScore();
+    }
+    else if(mode == GAMEHELP) {
+        ShowHELP();
+        
+    }
+    else if(mode == GAMERANKING) {
+        
     }
     glutSwapBuffers();
     glFlush();
