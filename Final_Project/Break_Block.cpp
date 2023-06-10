@@ -35,6 +35,7 @@
 #define    GAMEHELP         4
 #define    GAMERANKING      5
 #define    GAMEUPLOAD       6
+#define    GAMELOADING      7
 
 #define RESOURCE_PATH "/Users/limdohun/class/Computer-Graphics/Computer-Graphics/"
 
@@ -394,7 +395,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool mypause = true;
-int  mode  = GAMEREADY;
+int  mode  = GAMELOADING;
 bool start = false;
 
 const int star_num = 100;
@@ -862,6 +863,10 @@ void InitBlock() {
         rectangleBlock[i].modeState = true;
         rectangleBlock[i].y = rectangleBlock[i].leftBottom.y;
     }
+}
+
+void InitBackGround() {
+    new PlayAudio(GetResource("game_music/BackGround.mp3"), true, 0, 0.7);
 }
 
 
@@ -2062,6 +2067,75 @@ void ShowUPLOAD() {
 }
 
 
+bool c[5][5] = {
+    { 1, 0, 0, 0, 1 },
+    { 0, 0, 0, 1, 0 },
+    { 0, 0, 1, 0, 0 },
+    { 0, 1, 0, 0, 0 },
+    { 1, 0, 0, 0, 1 },
+};
+
+int loadingDelay = 0;
+
+void ShowLoading() {
+    int startX = 350;
+    int startY = 485;
+    int size = 30;
+    
+    glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    glLineWidth(3);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(startX - 5, startY - 5);
+    glVertex2f(startX - 5, startY + size + 5);
+    glVertex2f(startX + 5 + size * 10, startY + size + 5);
+    glVertex2f(startX + 5 + size * 10, startY - 5);
+    glEnd();
+    glLineWidth(1);
+    
+    for(int i = 0; i < loadingDelay / 50; i ++) {
+        DrawRectangle(startX + i * size, startY, size);
+    }
+    // 4번 100의 자리
+    // 5번 10의 자리
+    // 6번 1의자리
+    // 7번 %
+    startX = 442;
+    startY = 487;
+    size = 5;
+    
+    int num = loadingDelay / 50;
+    
+    if (num > 9) {
+        glColor3f(0, 0, 0);
+        DrawNUM(startX, startY, size, 1);
+    }
+    startX += 30;
+    
+    if (num > 0) {
+        if(num > 4) glColor3f(0, 0, 0);
+        else glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+        DrawNUM(startX, startY, size, num % 10);
+    }
+    startX += 30;
+    
+    if(num > 5) glColor3f(0, 0, 0);
+    else glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    DrawNUM(startX, startY, size, 0);
+    
+    startX += 30;
+    
+    if(num > 6) glColor3f(0, 0, 0);
+    else glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    for(int y = 0; y < 5; y ++) {
+        for(int x = 0; x < 5; x ++){
+            if(c[4 - y][x]) DrawRectangle(startX + x * size, startY + y * size, size);
+        }
+    }
+    
+    loadingDelay++;
+}
+
+
 
 /*
  *  Event Callback Function
@@ -2406,7 +2480,13 @@ void RenderScene(void) {
     else if(mode == GAMEUPLOAD) {
         ShowUPLOAD();
     }
-    
+    else if(mode == GAMELOADING) {
+        ShowLoading();
+        if(loadingDelay > 550 ) {
+            mode = GAMEREADY;
+            InitBackGround();
+        }
+    }
     glutSwapBuffers();
     glFlush();
 }
@@ -2414,7 +2494,6 @@ void RenderScene(void) {
 
 int main(int argc, char** argv) {
     loadRanking();
-    new PlayAudio(GetResource("game_music/BackGround.mp3"), true, 0, 0.7);
     InitSpace();
     InitWall();
     InitClear();
