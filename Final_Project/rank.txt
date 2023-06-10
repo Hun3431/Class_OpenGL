@@ -1,0 +1,5 @@
+FBA 1900 116
+hun 5 0
+jun 4 0
+min 3 0
+sek 2 0
