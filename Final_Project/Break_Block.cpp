@@ -7,6 +7,7 @@
 #include <future>
 #include <chrono>
 #include "miniaudio.h"
+#include <fstream>
 
 #define    PI               M_PI
 #define    WIDTH            1000
@@ -746,6 +747,42 @@ bool NUMBER[10][5][5] = {
         { 1, 1, 1, 1, 0 }
     },
 };
+
+
+
+
+void saveRanking() {
+    ofstream file(GetResource("rank.txt"));
+    if (!file) {
+        cout << "Failed to open file." << endl;
+        return;
+    }
+
+    for (int i = 0; i < 5; i++) {
+        file << ranking[i].name << " " << ranking[i].score << " " << ranking[i].time << endl;
+    }
+
+    file.close();
+    cout << "Ranking saved successfully." << endl;
+}
+
+void loadRanking() {
+    ifstream file(GetResource("rank.txt"));
+    if (!file) {
+        cout << "Failed to open file." << endl;
+        return;
+    }
+
+    for (int i = 0; i < 5; i++) {
+        if (!(file >> ranking[i].name >> ranking[i].score >> ranking[i].time)) {
+            cout << "Failed to read file." << endl;
+            break;
+        }
+    }
+
+    file.close();
+    cout << "Ranking loaded successfully." << endl;
+}
 
 
 /*
@@ -2138,7 +2175,7 @@ void MySpecialKey(int key, int x, int y) {
                         break;
                     case GAMEUPLOAD:
                         new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
-                        
+                        saveRanking();
                         InitGame();
                         InitWall();
                         InitClear();
@@ -2376,6 +2413,7 @@ void RenderScene(void) {
 
 
 int main(int argc, char** argv) {
+    loadRanking();
     new PlayAudio(GetResource("game_music/BackGround.mp3"), true, 0, 0.7);
     InitSpace();
     InitWall();
