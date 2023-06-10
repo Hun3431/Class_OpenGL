@@ -32,6 +32,7 @@ using namespace std;
 #define    GAMECLEAR        3
 #define    GAMEHELP         4
 #define    GAMERANKING      5
+#define    GAMEUPLOAD       6
 
 bool debug = false;
 
@@ -279,8 +280,8 @@ public:
 
 typedef struct _RanKing {
     string name = "unk";
-    int score = 1234;
-    int time = 12345;
+    int score = 0;
+    int time = 0;
 } RanKing;
 
 RanKing ranking[5];
@@ -339,7 +340,7 @@ int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
 bool pause = true;
-int  mode  = GAMERANKING;
+int  mode  = GAMEREADY;
 bool start = false;
 
 const int star_num = 100;
@@ -356,6 +357,16 @@ int life = 3;
 int runtime = 0;
 int score = 0;
 
+
+bool upload = true;
+int myscore;
+int mytime;
+int myrank = 10;
+int ranknum = 0;
+int rankloop = 0;
+RanKing user = { "   ", 0, 0 };
+
+
 /*
  *  Shape Color
  */
@@ -369,6 +380,15 @@ Color softBlue = { 0.6, 0.8, 0.95 };
 /*
  *  Bitmap Setting
  */
+
+bool UNDERBAR[5][5] = {
+    { 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0 },
+    { 1, 1, 1, 1, 1 }
+};
+
 bool ALPHA[][5][5] = {
     /// A
     {
@@ -717,6 +737,43 @@ void InitClear() {
     }
 }
 
+void InitGame() {
+    copycount = 0;
+    life = 3;
+    runtime = 0;
+    score = 0;
+    start = false;
+    
+    slidingBar = { WIDTH / 2, 0, slidingBarLen, slidingBarWeight };
+    
+    ballRadius = 10.0;
+    ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
+    speedX = 1.0;
+    speedY = 6.0;
+    speedSum = sqrt(speedX * speedX + speedY * speedY);
+    Vector ballSpeed = { speedX, speedY };
+    beforeTouch = -1;
+    startX = 90;
+    startY = 50;
+}
+
+void InitRank() {
+    myrank = 10;
+    ranknum = 0;
+    rankloop = 0;
+    user = { "   ", 0, 0 };
+}
+
+void InitBlock() {
+    for(int i = 0; i < RECTANGLE_BLOCK_NUM; i ++) {
+        rectangleBlock[i].mode = rand() % 4 + 1;
+        rectangleBlock[i].state = rand() % 3 + 1;
+        rectangleBlock[i].modeState = true;
+        rectangleBlock[i].y = rectangleBlock[i].leftBottom.y;
+    }
+}
+
+
 /*
  *  Create Function
  */
@@ -1059,7 +1116,7 @@ void CollisionDetectionToRectangleBlock() {
                 }
                 else rectangleBlock[i].state --;
                 
-                if(!rectangleBlock[i].state) score += 50;
+                if(!rectangleBlock[i].state) score += 100;
                 
                 beforeTouch = i + WALL_NUM;
                 
@@ -1082,7 +1139,7 @@ void CollisionDetectionToRectangleBlock() {
                 }
                 else rectangleBlock[i].state --;
                 
-                if(!rectangleBlock[i].state) score += 50;
+                if(!rectangleBlock[i].state) score += 100;
                 
                 beforeTouch = i + WALL_NUM;
                 
@@ -1105,7 +1162,7 @@ void CollisionDetectionToRectangleBlock() {
                 }
                 else rectangleBlock[i].state --;
                 
-                if(!rectangleBlock[i].state) score += 50;
+                if(!rectangleBlock[i].state) score += 100;
                 
                 beforeTouch = i + WALL_NUM;
                 
@@ -1129,7 +1186,7 @@ void CollisionDetectionToRectangleBlock() {
                 }
                 else rectangleBlock[i].state --;
                 
-                if(!rectangleBlock[i].state) score += 50;
+                if(!rectangleBlock[i].state) score += 100;
                 
                 beforeTouch = i + WALL_NUM;
                 
@@ -1146,7 +1203,7 @@ void CollisionDetectionToRectangleBlock() {
                     }
                     else rectangleBlock[i].state --;
                     
-                    if(!rectangleBlock[i].state) score += 50;
+                    if(!rectangleBlock[i].state) score += 100;
                     
                     Point _block;
                     _block.x = rectangleBlock[i].leftBottom.x + rectangleBlockLen / 2;
@@ -1188,7 +1245,7 @@ void CollisionDetectionToCopyBall() {
                     
                     rectangleBlock[i].state --;
                     
-                    if(!rectangleBlock[i].state) score += 50;
+                    if(!rectangleBlock[i].state) score += 100;
                     
                     copyball[j]->beforeTouch = i + WALL_NUM;
                     
@@ -1206,7 +1263,7 @@ void CollisionDetectionToCopyBall() {
                     copyball[j]->ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
                     rectangleBlock[i].state --;
-                    if(!rectangleBlock[i].state) score += 50;
+                    if(!rectangleBlock[i].state) score += 100;
                     
                     copyball[j]->beforeTouch = i + WALL_NUM;
                     
@@ -1224,7 +1281,7 @@ void CollisionDetectionToCopyBall() {
                     copyball[j]->ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
                     rectangleBlock[i].state --;
-                    if(!rectangleBlock[i].state) score += 50;
+                    if(!rectangleBlock[i].state) score += 100;
                     
                     copyball[j]->beforeTouch = i + WALL_NUM;
                     
@@ -1242,7 +1299,7 @@ void CollisionDetectionToCopyBall() {
                     copyball[j]->ballSpeed.y = v.y * (speedSum / vSum / 2);
                     
                     rectangleBlock[i].state --;
-                    if(!rectangleBlock[i].state) score += 50;
+                    if(!rectangleBlock[i].state) score += 100;
                     
                     copyball[j]->beforeTouch = i + WALL_NUM;
                     
@@ -1254,7 +1311,7 @@ void CollisionDetectionToCopyBall() {
                     if(copyball[j]->ballPosition.x + copyball[j]->ballRadius >= rectangleBlock[i].leftBottom.x && copyball[j]->ballPosition.x - copyball[j]->ballRadius <= rectangleBlock[i].rightBottom.x){
                         
                         rectangleBlock[i].state --;
-                        if(!rectangleBlock[i].state) score += 50;
+                        if(!rectangleBlock[i].state) score += 100;
                         
                         Point _block;
                         _block.x = rectangleBlock[i].leftBottom.x + rectangleBlockLen / 2;
@@ -1293,7 +1350,7 @@ void CollisionDetectionToItem() {
                             break;
                         case MODE_SCORE:
                             cout << "MODE_SCORE" << endl;
-                            score += 100;
+                            score += 300;
                             break;
                         case MODE_SIZEUP:
                             cout << "MODE_SIZEUP" << endl;
@@ -1859,6 +1916,61 @@ void ShowRANK() {
     DrawMEMO(startX, startY, size, "Push esc to back");
 }
 
+void DrawUNDERLINE(int startX, int startY, int size) {
+    for(int y = 0; y < 5; y ++) {
+        for(int x = 0; x < 5; x ++) {
+            if(UNDERBAR[y][x]) {
+                DrawRectangle(x * size + startX, (4 - y) * size + startY, size);
+            }
+        }
+    }
+}
+
+
+void ShowUPLOAD() {
+    
+    if(upload){
+        myscore = score;
+        mytime = runtime;
+        user.score = myscore;
+        user.time = mytime;
+        
+        for(int i = 0; i < 5; i ++) {
+            cout << ranking[i].score << " | " << myscore << endl;
+            if(ranking[i].score < myscore) {
+                for(int j = 4; j > i; j --) {
+                    ranking[j] = ranking[j - 1];
+                }
+                myrank = i;
+                break;
+            }
+            else if(ranking[i].score == myscore) {
+                if(ranking[i].time > mytime) {
+                    for(int j = 4; j > i; j --) {
+                        ranking[j] = ranking[j - 1];
+                    }
+                    myrank = i;
+                    break;
+                }
+            }
+        }
+        cout << myrank;
+        upload = false;
+    }
+    
+    if(myrank < 5) ranking[myrank] = user;
+    
+    ShowRANK();
+    
+    glColor3f(softWhite.red, softWhite.green, softWhite.blue);
+    if((rankloop / 50) % 2) DrawUNDERLINE(150 + (ranknum % 3) * 60, 570 - myrank * 110, 10);
+    
+    rankloop ++;
+    rankloop %= 100;
+}
+
+
+
 /*
  *  Event Callback Function
  */
@@ -1888,19 +2000,36 @@ void MySpecialKey(int key, int x, int y) {
     else {
         switch (key) {
             case GLUT_KEY_LEFT:
-                if(!start) {
-                    startX += startX < 180 ? + 1 : 0;
-                }
-                else if(pause) {
-                    slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
+                switch (mode) {
+                    case GAMEUPLOAD:
+                        ranknum -= ranknum != 0 ? 1 : 0;
+                        break;
+                    case GAMERUN:
+                        if(!start) {
+                            startX += startX < 180 ? + 1 : 0;
+                        }
+                        else if(pause) {
+                            slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
+                        }
+                    default:
+                        break;
                 }
                 break;
             case GLUT_KEY_RIGHT:
-                if(!start) {
-                    startX += startX > 0 ? - 1 : 0;
-                }
-                else if(pause) {
-                    slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
+                switch (mode) {
+                    case GAMEUPLOAD:
+                        ranknum ++;
+                        ranknum %= 3;
+                        break;
+                    case GAMERUN:
+                        if(!start) {
+                            startX += startX > 0 ? - 1 : 0;
+                        }
+                        else if(pause) {
+                            slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
+                        }
+                    default:
+                        break;
                 }
                 break;
                 // 스페이스바
@@ -1925,6 +2054,10 @@ void MySpecialKey(int key, int x, int y) {
                                 break;
                         }
                         break;
+                    case GAMECLEAR:
+                        upload = true;
+                        mode = GAMEUPLOAD;
+                        break;
                     case GAMERUN:
                         if(!start && startX != 90) {
                             float delta = 2 * PI / 360;
@@ -1937,6 +2070,14 @@ void MySpecialKey(int key, int x, int y) {
                             powerHitCheck = true;
                             powerHitVariation = powerHitGauge / 20;
                         }
+                        break;
+                    case GAMEUPLOAD:
+                        InitGame();
+                        InitWall();
+                        InitClear();
+                        InitRank();
+                        InitBlock();
+                        mode = GAMEREADY;
                         break;
                     default:
                         break;
@@ -1960,6 +2101,14 @@ void MySpecialKey(int key, int x, int y) {
                     case GAMERANKING:
                         mode = GAMEREADY;
                         break;
+                    case GAMEUPLOAD:
+                        InitGame();
+                        InitWall();
+                        InitClear();
+                        InitRank();
+                        InitBlock();
+                        mode = GAMEREADY;
+                        break;
                     default:
                         break;
                 }
@@ -1972,6 +2121,13 @@ void MySpecialKey(int key, int x, int y) {
                     case GAMERUN:
                         startY += startY < 100 ? + 1 : 0;
                         break;
+                    case GAMEUPLOAD:
+                        if(user.name[ranknum] == ' ') user.name[ranknum] = 'A';
+                        else if(user.name[ranknum] == 'Z') user.name[ranknum] = ' ';
+                        else user.name[ranknum] ++;
+                        cout << user.name[ranknum] << endl;
+                        break;
+
                 }
                 break;
             case GLUT_KEY_DOWN:
@@ -1982,6 +2138,13 @@ void MySpecialKey(int key, int x, int y) {
                     case GAMERUN:
                         startY += startY > 20 ? - 1 : 0;
                         break;
+                    case GAMEUPLOAD:
+                        if(user.name[ranknum] == ' ') user.name[ranknum] = 'Z';
+                        else if(user.name[ranknum] == 'A') user.name[ranknum] = ' ';
+                        else user.name[ranknum]--;
+                        cout << user.name[ranknum] << endl;
+                        break;
+
                 }
                 break;
             case GLUT_KEY_PAGE_UP:
@@ -2116,6 +2279,10 @@ void RenderScene(void) {
     else if(mode == GAMERANKING) {
         ShowRANK();
     }
+    else if(mode == GAMEUPLOAD) {
+        ShowUPLOAD();
+    }
+    
     glutSwapBuffers();
     glFlush();
 }
