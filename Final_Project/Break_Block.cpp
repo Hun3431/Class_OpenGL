@@ -4,8 +4,9 @@
 #include <random>
 #include <ctime>
 #include <string>
-
-using namespace std;
+#include <future>
+#include <chrono>
+#include "miniaudio.h"
 
 #define    PI               M_PI
 #define    WIDTH            1000
@@ -34,6 +35,57 @@ using namespace std;
 #define    GAMERANKING      5
 #define    GAMEUPLOAD       6
 
+#define RESOURCE_PATH "/Users/limdohun/class/Computer-Graphics/Computer-Graphics/"
+
+using namespace std;
+
+class PlayAudio {
+public:
+    ma_engine* engine;
+    ma_sound* sound;
+
+    PlayAudio(string path, bool isLoop = false, int delay = 0, float volume = 1.0) {
+        ma_result result;
+        engine = new ma_engine;
+        sound = new ma_sound;
+        
+        result = ma_engine_init(NULL, engine);
+        if (result != MA_SUCCESS) {
+            printf("Failed to initialize audio engine.");
+            exit(EXIT_FAILURE);
+        }
+        
+        result = ma_sound_init_from_file(engine, path.c_str(), 0, NULL, NULL, sound);
+        if (result != MA_SUCCESS) {
+            printf("Failed loaded audio file (%s)\n", path.c_str());
+            exit(EXIT_FAILURE);
+        }
+        
+        ma_volume_db_to_linear(volume);
+        
+        ma_sound_set_looping(sound, isLoop);
+        
+        auto future = std::async(std::launch::async, [this, delay, path](){
+            std::this_thread::sleep_for(std::chrono::seconds(delay));
+            ma_sound_start(this->sound);
+        });
+    }
+    
+    ~PlayAudio() {
+        ma_sound_uninit(sound);
+        ma_engine_uninit(engine);
+        
+        delete sound;
+        delete engine;
+    }
+};
+
+
+
+string GetResource(string path) {
+    return RESOURCE_PATH + path;
+}
+
 bool debug = false;
 
 /*
@@ -43,7 +95,7 @@ bool debug = false;
 typedef struct _Point {
     float    x = 0.0;
     float    y = 0.0;
-} Point;
+} myPoint;
 
 /// 색상(RGBC)의 정보를 나타내는 구조체
 typedef struct _Color {
@@ -67,10 +119,10 @@ Color ColorList[] = {
 
 /// 벽돌의 정보를 나타내는 구조체
 typedef struct _Block {
-    Point leftTop = { 0, 0 };
-    Point leftBottom = { 0, 0 };
-    Point rightTop = { 0, 0 };
-    Point rightBottom = { 0, 0 };
+    myPoint leftTop = { 0, 0 };
+    myPoint leftBottom = { 0, 0 };
+    myPoint rightTop = { 0, 0 };
+    myPoint rightBottom = { 0, 0 };
     int mode = MODE_DEFAULT;
     int state = STATE_TWO;
     bool modeState = true;
@@ -79,6 +131,7 @@ typedef struct _Block {
     
     void Event() {
         if(y == 0 && modeState) {
+            new PlayAudio(GetResource("game_music/break.wav"), false, 0, 1.0);
             x = (rightBottom.x - leftBottom.x) / 2 + leftBottom.x;
             y = rightBottom.y;
         }
@@ -118,7 +171,7 @@ typedef struct _Block {
 
 /// 하단의 슬라이딩 바의 정보를 나타내는 구조체
 typedef struct _Bar {
-    Point center;
+    myPoint center;
     int len;
     int weight;
 } Bar;
@@ -247,11 +300,11 @@ public:
     float ballRadius = 10.0;
     float speedSum;
     int beforeTouch = -1;
-    Point ballPosition;
+    myPoint ballPosition;
     Vector ballSpeed;
     Color color = { 0.6, 0.6, 0.6 };
     
-    Ball(Point _ballPosition, Vector _ballSpeed) {
+    Ball(myPoint _ballPosition, Vector _ballSpeed) {
         ballPosition = _ballPosition;
         ballSpeed = _ballSpeed;
         speedSum = sqrt(ballSpeed.x * ballSpeed.x + ballSpeed.y * ballSpeed.y);
@@ -309,7 +362,7 @@ bool powerMode = false;
 
 /// 공 선언 및 초기화
 float ballRadius = 10.0;
-Point ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
+myPoint ballPosition = { WIDTH / 2, slidingBarWeight + ballRadius };
 float speedX = 1.0;
 float speedY = 6.0;
 float speedSum = sqrt(speedX * speedX + speedY * speedY);
@@ -319,7 +372,7 @@ float startX = 90;
 float startY = 50;
 
 /// 내부 벽 선언 및 초기화
-Point Wall[WALL_NUM] = {
+myPoint Wall[WALL_NUM] = {
     {  150,    0 },
     {  150,  350 },
     {    0,  700 },
@@ -339,7 +392,7 @@ Block rectangleBlock[RECTANGLE_BLOCK_NUM];
 int rectangleBlockLen = 100;
 int rectangleBlockWeight = 50;
 
-bool pause = true;
+bool mypause = true;
 int  mode  = GAMEREADY;
 bool start = false;
 
@@ -376,6 +429,7 @@ Color softWhite = { 0.97, 0.95, 0.99 };
 Color softRed = { 0.99, 0.4, 0.4 };
 Color softGreen = { 0.5, 0.8, 0.7 };
 Color softBlue = { 0.6, 0.8, 0.95 };
+
 
 /*
  *  Bitmap Setting
@@ -832,7 +886,7 @@ void CreateRectangleBlock() {
 void CreateCopyBall() {
     float px = rand() % 600 + 200;
     float py = rand() % 400 + 50;
-    Point position = { px, py };
+    myPoint position = { px, py };
     float sx = (rand() % 10 - 5) / 2.0;
     float sy = (rand() % 10 ) / 2.0;
     Vector speed = { sx, sy };
@@ -845,17 +899,17 @@ void CreateCopyBall() {
  *  Math Function
  */
 /// 기울기를 반환해주는 함수
-float inclination(Point a1, Point a2) {
+float inclination(myPoint a1, myPoint a2) {
     return (a1.x == a2.x) ? 0 : (a2.y - a1.y) / (a2.x - a1.x);
 }
 
 /// 두 점과 y 값을 넣으면 x 값을 반환해주는 함수
-float return_X(float y, Point a1, Point a2) {
+float return_X(float y, myPoint a1, myPoint a2) {
     return (y - a1.y) / inclination(a1, a2) + a1.x;
 }
 
 /// 두 점과 x 값을 넣으면 y 값을 반환해주는 함수
-float return_Y(float x, Point a1, Point a2) {
+float return_Y(float x, myPoint a1, myPoint a2) {
     float m = inclination(a1, a2);
     if (a2.x - a1.x != 0) {
         return m * x - m * a1.x + a1.y;
@@ -882,21 +936,20 @@ void ChangeSpeed(float change) {
 }
 
 /// 두 선분의 교점을 구하는 함수
-Point MeetPoint(Point a1, Point a2, Point b1, Point b2) {
+myPoint MeetPoint(myPoint a1, myPoint a2, myPoint b1, myPoint b2) {
     float x = ((a1.x * a2.y - a1.y * a2.x) * (b1.x - b2.x) - (a1.x - a2.x) * (b1.x * b2.y - b1.y * b2.x)) / ((a1.x - a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x - b2.x));
     float y = ((a1.x * a2.y - a1.y * a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x * b2.y - b1.y * b2.x)) / ((a1.x - a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x - b2.x));
-    Point p = { x, y };
+    myPoint p = { x, y };
     
     return p;
 }
-
 
 /*
  *  SpecialMode Function
  */
 /// Sliding Bar Power Hit Mode
 void PowerHit() {
-    //cout << powerHitGauge << endl;
+    
     if(powerHitCheck) {
         if(powerHitGauge > slidingBar.center.y) {
             slidingBar.center.y += powerHitVariation;
@@ -927,7 +980,7 @@ void PowerHit() {
  *  CollisionDetection Function
  */
 /// 외부 벽과의 충돌을 확인하는 함수
-void CollisionDetectionToWindow(Point& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch, bool* state = nullptr) {
+void CollisionDetectionToWindow(myPoint& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch, bool* state = nullptr) {
     speed.x *= ball.x + *radius >= WIDTH ? -1 : 1;
     speed.x *= ball.x - *radius <= 0 ? -1 : 1;
     speed.y *= ball.y + *radius >= HEIGHT ? -1 : 1;
@@ -946,7 +999,7 @@ void CollisionDetectionToWindow(Point& ball = ballPosition, Vector& speed = ball
 
 /// 점과 직선 사이의 거리를 구하는 함수
 /// d = |Ax + By + C| / sqrt(A^2 + B^2)
-float PointToLineDistance(Point p, Point w1, Point w2) {
+float PointToLineDistance(myPoint p, myPoint w1, myPoint w2) {
     float A = inclination(w1, w2); // 기울기
     float B = -1.0f;
     float C = return_Y(0, w1, w2); // Y 절편
@@ -955,13 +1008,13 @@ float PointToLineDistance(Point p, Point w1, Point w2) {
 }
 
 /// 점과 점 사이의 거리를 구하는 함수
-float PointToPointDistance(Point a, Point b) {
+float PointToPointDistance(myPoint a, myPoint b) {
     return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
 }
 
 
 /// 내부 벽과 충돌을 확인하는 함수(방법 번경)
-void CollisionDetectionToWall(Point& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch) {
+void CollisionDetectionToWall(myPoint& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch) {
     
     for(int i = 0; i < WALL_NUM - 1; i ++) {
         // 벽 y 좌표상의 위아래를 나눠주는 조건문
@@ -1003,8 +1056,8 @@ void CollisionDetectionToWall(Point& ball = ballPosition, Vector& speed = ballSp
             }
             if (distance <= *radius && *touch != i){
                 // 공이 충돌해서 벽을 넘어간 경우 벽에 넘어가기 직전으로(다여있는 곳으로) 이동
-                Point before = { ball.x - speed.x, ball.y - speed.y };
-                Point meet = MeetPoint(Wall[i], Wall[i + 1], ball, before);
+                myPoint before = { ball.x - speed.x, ball.y - speed.y };
+                myPoint meet = MeetPoint(Wall[i], Wall[i + 1], ball, before);
                 float len = PointToPointDistance(ball, before);
                 float ratio = len / PointToPointDistance(ball, meet);
                 float x = (ball.x - before.x) * ratio;
@@ -1036,7 +1089,7 @@ void CollisionDetectionToWall(Point& ball = ballPosition, Vector& speed = ballSp
 }
 
 /// 벽면 모서리와의 충돌을 확인하는 함수
-void CollisionDetectionToCorner(Point& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch) {
+void CollisionDetectionToCorner(myPoint& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch) {
     for(int i = 1; i < WALL_NUM - 1; i ++) {
         float distance = (ball.x - Wall[i].x) * (ball.x - Wall[i].x) + (ball.y - Wall[i].y) * (ball.y - Wall[i].y);
         if(distance <= pow(*radius, 2)) {
@@ -1051,7 +1104,7 @@ void CollisionDetectionToCorner(Point& ball = ballPosition, Vector& speed = ball
 
 
 /// 슬라이딩바와 충돌을 확인하는 함수
-void CollisionDetectionToSlidingBar(Point& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch) {
+void CollisionDetectionToSlidingBar(myPoint& ball = ballPosition, Vector& speed = ballSpeed, float* radius = &ballRadius, int* touch = &beforeTouch) {
     if (*touch != RECTANGLE_BLOCK_NUM + WALL_NUM + 1) {
         float distance = pow(ball.x - (slidingBar.center.x - slidingBarLen / 2), 2) + pow(ball.y - (slidingBar.center.y + slidingBarWeight), 2);
         if(distance <= pow(*radius, 2)) {
@@ -1205,7 +1258,7 @@ void CollisionDetectionToRectangleBlock() {
                     
                     if(!rectangleBlock[i].state) score += 100;
                     
-                    Point _block;
+                    myPoint _block;
                     _block.x = rectangleBlock[i].leftBottom.x + rectangleBlockLen / 2;
                     _block.y = rectangleBlock[i].leftBottom.y + rectangleBlockWeight / 2;
                     float inc = inclination(ballPosition, _block);
@@ -1313,7 +1366,7 @@ void CollisionDetectionToCopyBall() {
                         rectangleBlock[i].state --;
                         if(!rectangleBlock[i].state) score += 100;
                         
-                        Point _block;
+                        myPoint _block;
                         _block.x = rectangleBlock[i].leftBottom.x + rectangleBlockLen / 2;
                         _block.y = rectangleBlock[i].leftBottom.y + rectangleBlockWeight / 2;
                         float inc = inclination(copyball[j]->ballPosition, _block);
@@ -1343,6 +1396,7 @@ void CollisionDetectionToItem() {
             if(rectangleBlock[i].y < slidingBar.center.y + slidingBar.weight) {
                 if(rectangleBlock[i].x < slidingBar.center.x + slidingBarLen / 2 && rectangleBlock[i].x > slidingBar.center.x - slidingBarLen / 2){
                     rectangleBlock[i].modeState = false;
+                    new PlayAudio(GetResource("game_music/item.wav"), false, 0, 1.0);
                     switch (rectangleBlock[i].mode) {
                         case MODE_COPY:
                             cout << "MODE_COPY" << endl;
@@ -1440,7 +1494,7 @@ void ShowRectangleBlock() {
             glEnd();
         }
         else {
-            if(pause) rectangleBlock[i].Event();
+            if(mypause) rectangleBlock[i].Event();
             else {
                 switch (rectangleBlock[i].mode) {
                 case MODE_COPY:
@@ -1806,9 +1860,10 @@ void ShowREADY(){
     DrawEXIT();
     glColor3f(softRed.red, softRed.green, softRed.blue);
     DrawARROW();
-}
+} 
 
 void ShowCLEAR() {
+
     for(int i = 0; i < FIRENUM; i ++) {
         fire[i] -> Fire();
     }
@@ -1979,16 +2034,16 @@ void MySpecialKey(int key, int x, int y) {
     if (debug) {
         switch (key) {
             case GLUT_KEY_UP:
-                ballPosition.y += 5;
+                ballPosition.y += 10;
                 break;
             case GLUT_KEY_DOWN:
-                ballPosition.y -= 5;
+                ballPosition.y -= 10;
                 break;
             case GLUT_KEY_LEFT:
-                ballPosition.x -= 5;
+                ballPosition.x -= 10;
                 break;
             case GLUT_KEY_RIGHT:
-                ballPosition.x += 5;
+                ballPosition.x += 10;
                 break;
             case GLUT_KEY_PAGE_UP:
                 debug = !debug;
@@ -2002,13 +2057,14 @@ void MySpecialKey(int key, int x, int y) {
             case GLUT_KEY_LEFT:
                 switch (mode) {
                     case GAMEUPLOAD:
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
                         ranknum -= ranknum != 0 ? 1 : 0;
                         break;
                     case GAMERUN:
                         if(!start) {
                             startX += startX < 180 ? + 1 : 0;
                         }
-                        else if(pause) {
+                        else if(mypause) {
                             slidingBar.center.x -= slidingBar.center.x - slidingBar.len / 2 > Wall[0].x ? slidingBarSpeed : 0;
                         }
                     default:
@@ -2018,14 +2074,16 @@ void MySpecialKey(int key, int x, int y) {
             case GLUT_KEY_RIGHT:
                 switch (mode) {
                     case GAMEUPLOAD:
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
                         ranknum ++;
                         ranknum %= 3;
+                        
                         break;
                     case GAMERUN:
                         if(!start) {
                             startX += startX > 0 ? - 1 : 0;
                         }
-                        else if(pause) {
+                        else if(mypause) {
                             slidingBar.center.x += slidingBar.center.x + slidingBar.len / 2 < Wall[8].x ? slidingBarSpeed : 0;
                         }
                     default:
@@ -2036,6 +2094,7 @@ void MySpecialKey(int key, int x, int y) {
             case 32:
                 switch (mode) {
                     case GAMEREADY:
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
                         switch (arrownum) {
                             case 0:
                                 mode = GAMERUN;
@@ -2055,8 +2114,13 @@ void MySpecialKey(int key, int x, int y) {
                         }
                         break;
                     case GAMECLEAR:
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
                         upload = true;
                         mode = GAMEUPLOAD;
+                        break;
+                    case GAMEOVER:
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
+                        mode = GAMEREADY;
                         break;
                     case GAMERUN:
                         if(!start && startX != 90) {
@@ -2067,11 +2131,14 @@ void MySpecialKey(int key, int x, int y) {
                             ballSpeed.y = (startY / 20) * sin(delta * startX);
                         }
                         else if (start && powerHitGauge > 30){
+                            new PlayAudio(GetResource("game_music/Jump.wav"), false, 0, 1.0);
                             powerHitCheck = true;
                             powerHitVariation = powerHitGauge / 20;
                         }
                         break;
                     case GAMEUPLOAD:
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
+                        
                         InitGame();
                         InitWall();
                         InitClear();
@@ -2087,21 +2154,23 @@ void MySpecialKey(int key, int x, int y) {
             case 27:
                 switch (mode) {
                     case GAMERUN:
-                        pause = pause ? false : true;
-                        break;
-                    case GAMECLEAR:
-                        exit(0);
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
+                        mypause = mypause ? false : true;
                         break;
                     case GAMEOVER:
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
                         exit(0);
                         break;
                     case GAMEHELP:
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
                         mode = GAMEREADY;
                         break;
                     case GAMERANKING:
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
                         mode = GAMEREADY;
                         break;
                     case GAMEUPLOAD:
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
                         InitGame();
                         InitWall();
                         InitClear();
@@ -2116,35 +2185,51 @@ void MySpecialKey(int key, int x, int y) {
             case GLUT_KEY_UP:
                 switch (mode) {
                     case GAMEREADY:
+                    {
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
+                        
                         arrownum += arrownum - 1 < 0 ? 3 : - 1;
                         break;
+                    }
                     case GAMERUN:
                         startY += startY < 100 ? + 1 : 0;
                         break;
                     case GAMEUPLOAD:
+                    {
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
+                        
                         if(user.name[ranknum] == ' ') user.name[ranknum] = 'A';
                         else if(user.name[ranknum] == 'Z') user.name[ranknum] = ' ';
                         else user.name[ranknum] ++;
                         cout << user.name[ranknum] << endl;
+                        
                         break;
-
+                    }
                 }
                 break;
             case GLUT_KEY_DOWN:
                 switch (mode) {
                     case GAMEREADY:
+                    {
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
+                        
                         arrownum = ++arrownum % 4;
                         break;
+                    }
                     case GAMERUN:
                         startY += startY > 20 ? - 1 : 0;
                         break;
                     case GAMEUPLOAD:
+                    {
+                        new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
+                        
                         if(user.name[ranknum] == ' ') user.name[ranknum] = 'Z';
                         else if(user.name[ranknum] == 'A') user.name[ranknum] = ' ';
                         else user.name[ranknum]--;
                         cout << user.name[ranknum] << endl;
+                        
                         break;
-
+                    }
                 }
                 break;
             case GLUT_KEY_PAGE_UP:
@@ -2228,7 +2313,7 @@ void RenderScene(void) {
             
         }
         else {
-            if(CountBlock() && pause && start) {
+            if(CountBlock() && mypause && start) {
                 // 공의 위치 결정
                 ChangeSpeed(1);
                 if(powerMode) {
@@ -2248,13 +2333,15 @@ void RenderScene(void) {
         
         if(!life) {
             mode = GAMEOVER;
+            new PlayAudio(GetResource("game_music/move.wav"), false, 0, 1.0);
         }
         
         if(!CountBlock()) {
             mode = GAMECLEAR;
+            new PlayAudio(GetResource("game_music/fireworks-2.wav"), false, 0, 1.0);
         }
         
-        if(!pause) {
+        if(!mypause) {
             glColor3f(1.0f, 1.0f, 1.0f);
             DrawPAUSE();
         }
@@ -2289,6 +2376,7 @@ void RenderScene(void) {
 
 
 int main(int argc, char** argv) {
+    new PlayAudio(GetResource("game_music/BackGround.mp3"), true, 0, 0.7);
     InitSpace();
     InitWall();
     InitClear();
@@ -2303,7 +2391,5 @@ int main(int argc, char** argv) {
     glutSpecialFunc(MySpecialKey);
     glutIdleFunc(RenderScene);
     glutMainLoop();
+    
 }
-
-
-
